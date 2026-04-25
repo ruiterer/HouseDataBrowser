@@ -35,6 +35,26 @@ class ConversationMessage(SQLModel, table=True):
     created_at: datetime = Field(default_factory=_utcnow)
 
 
+class PinnedChart(SQLModel, table=True):
+    """A chart pinned from chat to the Dashboard.
+
+    We store the InfluxQL query and chart spec — NOT the data. The Dashboard
+    re-runs the query when it loads, so a pinned 'temperatuur vandaag' stays
+    current rather than freezing on the day it was pinned.
+    """
+
+    id: str = Field(default_factory=_new_uuid, primary_key=True)
+    title: str = "Vastgezette grafiek"
+    query: str
+    chart_spec: dict = Field(sa_column=Column(JSON))
+    layout_x: int = 0
+    layout_y: int = 0
+    layout_w: int = 6
+    layout_h: int = 4
+    created_at: datetime = Field(default_factory=_utcnow)
+    updated_at: datetime = Field(default_factory=_utcnow)
+
+
 class SchemaCache(SQLModel, table=True):
     """Per-measurement snapshot of the InfluxDB schema as last discovered."""
 

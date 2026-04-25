@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api.chat import router as chat_router
 from app.api.health import router as health_router
+from app.api.pins import router as pins_router
 from app.api.results import router as results_router
 from app.api.schema import router as schema_router
 from app.config import get_settings
@@ -78,6 +79,7 @@ def create_app() -> FastAPI:
     app.include_router(schema_router)
     app.include_router(chat_router)
     app.include_router(results_router)
+    app.include_router(pins_router)
 
     static_dir = Path(__file__).resolve().parents[1] / "static"
     if static_dir.exists():

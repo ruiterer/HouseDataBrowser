@@ -301,3 +301,62 @@ body { background: var(--bg); color: var(--text); }
 .raw-table summary:hover { color: var(--text); }
 
 .chart-empty { color: var(--muted); font-size: 0.9rem; }
+
+/* Pin button on chat messages */
+.pin-button {
+  margin-top: 0.5rem;
+  background: transparent; color: var(--muted);
+  border: 1px solid var(--border); border-radius: 4px;
+  padding: 0.3rem 0.7rem; cursor: pointer; font-size: 0.85rem;
+  transition: color 120ms, border-color 120ms;
+}
+.pin-button:hover:not(:disabled) {
+  color: var(--accent); border-color: rgba(79, 140, 255, 0.4);
+}
+.pin-button:disabled { opacity: 0.7; cursor: default; }
+
+/* Dashboard */
+.dashboard { padding: 0.5rem; }
+.pin-tile {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.pin-handle {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.4rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  cursor: move;
+  background: rgba(255, 255, 255, 0.02);
+  user-select: none;
+}
+.pin-handle:hover { background: rgba(255, 255, 255, 0.04); }
+.pin-title {
+  flex: 1; font-size: 0.85rem; font-weight: 500;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pin-actions { display: flex; gap: 0.25rem; }
+.pin-actions button {
+  background: transparent; color: var(--muted);
+  border: none; cursor: pointer; padding: 0.1rem 0.4rem;
+  border-radius: 3px; font-size: 1rem;
+}
+.pin-actions button:hover { color: var(--text); background: rgba(255, 255, 255, 0.05); }
+.pin-body {
+  flex: 1; padding: 0.5rem;
+  overflow: hidden;
+  display: flex; flex-direction: column; justify-content: center;
+}
+
+/* react-grid-layout placeholder while dragging */
+.react-grid-item.react-grid-placeholder {
+  background: rgba(79, 140, 255, 0.20) !important;
+  border: 2px dashed var(--accent) !important;
+  border-radius: 8px;
+}
+.react-grid-item > .react-resizable-handle::after {
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+}
