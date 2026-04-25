@@ -8,12 +8,16 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from app.api.chat import router as chat_router
 from app.api.health import router as health_router
+from app.api.results import router as results_router
 from app.api.schema import router as schema_router
 from app.config import get_settings
 from app.influx.client import InfluxClient
+from app.llm.factory import make_provider
 from app.state.db import init_schema, make_engine
 from app.state.refresh import SchemaRefresher
+from app.state.results import ResultCache
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s | %(message)s")
 logger = logging.getLogger(__name__)
@@ -35,8 +39,17 @@ async def lifespan(app: FastAPI):
     app.state.refresher = refresher
     refresher.start()
 
+    app.state.results = ResultCache(ttl_seconds=settings.results_ttl_seconds)
+
+    try:
+        app.state.llm = make_provider(settings)
+        logger.info("LLM provider ready: %s (%s)", app.state.llm.name, app.state.llm.model)
+    except Exception as exc:
+        app.state.llm = None
+        logger.warning("LLM provider unavailable: %s", exc)
+
     logger.info(
-        "Started — InfluxDB target %s:%s/%s, LLM provider %s, state DB %s",
+        "Started — InfluxDB target %s:%s/%s, LLM %s, state DB %s",
         settings.influx_host,
         settings.influx_port,
         settings.influx_database,
@@ -63,6 +76,8 @@ def create_app() -> FastAPI:
 
     app.include_router(health_router)
     app.include_router(schema_router)
+    app.include_router(chat_router)
+    app.include_router(results_router)
 
     static_dir = Path(__file__).resolve().parents[1] / "static"
     if static_dir.exists():

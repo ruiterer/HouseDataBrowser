@@ -10,11 +10,14 @@ __pycache__/
 node_modules/
 dist/
 build/
+tsconfig.tsbuildinfo
 
 # App
 backend/static/
 data/
 *.db
+*.db-wal
+*.db-shm
 *.log
 
 # Env

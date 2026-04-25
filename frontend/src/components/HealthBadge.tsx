@@ -26,7 +26,7 @@ export default function HealthBadge() {
   const ok = data.influx.connected;
   return (
     <span className={`health-badge ${ok ? "good" : "bad"}`} title={JSON.stringify(data, null, 2)}>
-      {ok ? `influx ✓ · ${data.llm.provider}` : "influx ✗"}
+      {ok ? `influx ✓ · ${data.llm.provider}` : "geen influx-verbinding"}
     </span>
   );
 }

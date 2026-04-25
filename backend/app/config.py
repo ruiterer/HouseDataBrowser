@@ -22,7 +22,15 @@ class Settings(BaseSettings):
     influx_row_limit: int = 50_000
 
     llm_provider: Literal["claude", "ollama"] = "claude"
-    llm_model: str = "claude-sonnet-4-6"
+    llm_model: str = "claude-opus-4-7"
+    # Supported by the Messages API on Opus 4.7: low | medium | high | max.
+    # ("xhigh" is documented for some clients but currently rejected by /v1/messages.)
+    llm_effort: Literal["low", "medium", "high", "max"] = "high"
+    # 64K is the recommended default for streaming requests on Opus 4.7 — leaves
+    # room for thinking + tool calls + final response at high/max effort. We use
+    # streaming + get_final_message() in the Claude provider so this is safe.
+    llm_max_tokens: int = 64000
+    llm_max_agent_steps: int = 12
 
     anthropic_api_key: str | None = None
 
@@ -30,6 +38,7 @@ class Settings(BaseSettings):
     ollama_model: str = "qwen2.5:3b-instruct"
 
     state_db_path: str = "./data/state.db"
+    results_ttl_seconds: int = 3600
 
     api_host: str = "0.0.0.0"
     api_port: int = 8000

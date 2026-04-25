@@ -22,7 +22,21 @@ def _ensure_parent(db_path: str) -> None:
 def make_engine(settings: Settings):
     _ensure_parent(settings.state_db_path)
     url = f"sqlite:///{settings.state_db_path}"
-    engine = create_engine(url, echo=False, connect_args={"check_same_thread": False})
+    engine = create_engine(
+        url,
+        echo=False,
+        # timeout: SQLite waits up to 30s for a busy lock to release before erroring.
+        # Default is 5s, which is too short when the schema refresher and a chat
+        # write race for the lock on app startup.
+        connect_args={"check_same_thread": False, "timeout": 30},
+    )
+    # WAL mode lets readers and one writer run concurrently without blocking
+    # each other. Critical for our threading model (schema refresh task + chat
+    # endpoint + schema browser all sharing one DB).
+    with engine.connect() as conn:
+        conn.exec_driver_sql("PRAGMA journal_mode=WAL")
+        conn.exec_driver_sql("PRAGMA synchronous=NORMAL")
+        conn.commit()
     return engine
 
 

@@ -16,6 +16,7 @@ export default function App() {
         </div>
         <HealthBadge />
       </nav>
+      {/* Nav labels stay as one-word terms that read the same in NL/EN. */}
       <main className="main">
         <Routes>
           <Route path="/" element={<Chat />} />

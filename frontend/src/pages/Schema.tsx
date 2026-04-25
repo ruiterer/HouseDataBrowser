@@ -8,9 +8,9 @@ import {
 } from "../api/schema";
 
 function formatTime(iso: string | null | undefined): string {
-  if (!iso) return "never";
+  if (!iso) return "nooit";
   const d = new Date(iso);
-  return d.toLocaleString();
+  return d.toLocaleString("nl-NL");
 }
 
 export default function Schema() {
@@ -40,29 +40,29 @@ export default function Schema() {
     );
   }, [data, filter]);
 
-  if (isLoading) return <div className="placeholder">Loading schema…</div>;
-  if (isError) return <div className="placeholder">Error: {(error as Error).message}</div>;
+  if (isLoading) return <div className="placeholder">Schema laden…</div>;
+  if (isError) return <div className="placeholder">Fout: {(error as Error).message}</div>;
   if (!data) return null;
 
   return (
     <div className="schema-page">
       <header className="schema-header">
-        <h2>Schema ({data.measurements.length} measurements)</h2>
+        <h2>Schema ({data.measurements.length} metingen)</h2>
         <div className="schema-meta">
-          <span>last refresh: {formatTime(data.last_refresh)}</span>
-          {data.is_refreshing && <span className="refreshing">refreshing…</span>}
-          {data.last_error && <span className="error">last error: {data.last_error}</span>}
+          <span>laatst vernieuwd: {formatTime(data.last_refresh)}</span>
+          {data.is_refreshing && <span className="refreshing">vernieuwen…</span>}
+          {data.last_error && <span className="error">laatste fout: {data.last_error}</span>}
           <button
             onClick={() => refreshMut.mutate()}
             disabled={data.is_refreshing || refreshMut.isPending}
           >
-            Refresh now
+            Nu vernieuwen
           </button>
         </div>
         <input
           type="text"
           className="schema-filter"
-          placeholder="Filter by measurement / tag / field / description…"
+          placeholder="Filter op meting / tag / veld / beschrijving…"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
         />
@@ -70,8 +70,9 @@ export default function Schema() {
 
       {data.measurements.length === 0 && (
         <div className="placeholder">
-          No measurements discovered yet. The first refresh runs on startup; if your
-          InfluxDB connection isn't working yet, fix that first (see the health badge).
+          Nog geen metingen gevonden. De eerste vernieuwing draait bij het starten;
+          als de InfluxDB-verbinding nog niet werkt, los dat dan eerst op (zie de
+          status-badge rechtsboven).
         </div>
       )}
 
@@ -104,24 +105,24 @@ function MeasurementCard({ m }: { m: Measurement }) {
         <span className="caret">{open ? "▾" : "▸"}</span>
         <span className="name">{m.measurement}</span>
         <span className="counts">
-          {m.tag_keys.length} tags · {m.field_keys.length} fields
+          {m.tag_keys.length} tags · {m.field_keys.length} velden
         </span>
       </div>
       {open && (
         <div className="schema-card-body" onClick={(e) => e.stopPropagation()}>
           <div className="schema-row">
-            <label>Description</label>
+            <label>Beschrijving</label>
             {editing ? (
               <div className="edit-row">
                 <textarea
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
                   rows={3}
-                  placeholder={`What is ${m.measurement}? (this hint goes to the LLM)`}
+                  placeholder={`Wat is ${m.measurement}? (deze hint gaat naar de LLM)`}
                 />
                 <div className="edit-actions">
                   <button onClick={() => saveMut.mutate()} disabled={saveMut.isPending}>
-                    {saveMut.isPending ? "Saving…" : "Save"}
+                    {saveMut.isPending ? "Opslaan…" : "Opslaan"}
                   </button>
                   <button
                     onClick={() => {
@@ -129,34 +130,34 @@ function MeasurementCard({ m }: { m: Measurement }) {
                       setDraft(m.description);
                     }}
                   >
-                    Cancel
+                    Annuleren
                   </button>
                 </div>
               </div>
             ) : (
               <div className="display-row">
                 <p className="description">
-                  {m.description || <em className="muted">No description.</em>}
+                  {m.description || <em className="muted">Geen beschrijving.</em>}
                 </p>
-                <button onClick={() => setEditing(true)}>Edit</button>
+                <button onClick={() => setEditing(true)}>Bewerken</button>
               </div>
             )}
           </div>
 
           <div className="schema-row">
-            <label>Field keys</label>
+            <label>Veldsleutels</label>
             <ul className="key-list">
               {m.field_keys.map((fk) => (
                 <li key={fk.name}>
                   <code>{fk.name}</code> <span className="muted">({fk.type})</span>
                 </li>
               ))}
-              {m.field_keys.length === 0 && <li className="muted">none</li>}
+              {m.field_keys.length === 0 && <li className="muted">geen</li>}
             </ul>
           </div>
 
           <div className="schema-row">
-            <label>Tag keys</label>
+            <label>Tagsleutels</label>
             <ul className="key-list">
               {m.tag_keys.map((tk) => {
                 const sample = m.tag_values[tk];
@@ -169,7 +170,7 @@ function MeasurementCard({ m }: { m: Measurement }) {
                   </li>
                 );
               })}
-              {m.tag_keys.length === 0 && <li className="muted">none</li>}
+              {m.tag_keys.length === 0 && <li className="muted">geen</li>}
             </ul>
           </div>
         </div>

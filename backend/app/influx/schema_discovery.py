@@ -33,6 +33,14 @@ class DiscoveryReport:
 
 
 async def discover(client: InfluxClient, session: Session) -> DiscoveryReport:
+    """Walk the schema and commit per-measurement.
+
+    Per-measurement commits keep each write transaction tiny so concurrent
+    writers (the chat endpoint creating a new Conversation, the schema
+    description editor) aren't blocked on a long-running discovery transaction.
+    With 562 measurements, one big transaction at the end can hold the lock for
+    30+ seconds and break the chat endpoint with `database is locked`.
+    """
     errors: list[str] = []
     measurements = await _list_measurements(client)
     logger.info("schema discovery: %d measurements", len(measurements))
@@ -54,11 +62,12 @@ async def discover(client: InfluxClient, session: Session) -> DiscoveryReport:
             row.tag_values = tag_values
             row.updated_at = _now()
             session.merge(row)
+            session.commit()
         except Exception as exc:
             logger.warning("discovery failed for %s: %s", m, exc)
             errors.append(f"{m}: {exc}")
+            session.rollback()
 
-    session.commit()
     return DiscoveryReport(
         measurements=len(measurements),
         refreshed_at=_now().isoformat(),
