@@ -57,13 +57,15 @@ export type StreamChatOpts = {
   conversationId?: string | null;
   message: string;
   deep?: boolean;
+  provider?: string | null;
+  model?: string | null;
   onEvent: (e: ChatEvent) => void;
   onError?: (err: unknown) => void;
   signal?: AbortSignal;
 };
 
 export async function streamChat(opts: StreamChatOpts): Promise<void> {
-  const { conversationId, message, deep, onEvent, onError, signal } = opts;
+  const { conversationId, message, deep, provider, model, onEvent, onError, signal } = opts;
   await fetchEventSource("/api/chat", {
     method: "POST",
     headers: { "content-type": "application/json", accept: "text/event-stream" },
@@ -71,6 +73,8 @@ export async function streamChat(opts: StreamChatOpts): Promise<void> {
       conversation_id: conversationId ?? null,
       message,
       deep: deep ?? false,
+      provider: provider ?? null,
+      model: model ?? null,
     }),
     signal,
     openWhenHidden: true,

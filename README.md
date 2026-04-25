@@ -17,7 +17,7 @@ Grafieken die je vaak gebruikt kun je vastzetten op een Dashboard.
   Raspberry Pi 5) door één env-variabele te wijzigen.
 - **Deployment**: Docker-container op hetzelfde LAN als je bestaande InfluxDB.
 
-## Status: alle 5 fases werkend
+## Status
 
 - ✅ Fase 1 — backend + frontend skeleton, InfluxQL safety filter (28 tests groen)
 - ✅ Fase 2 — schema-ontdekking + Schema-pagina met bewerkbare beschrijvingen
@@ -26,6 +26,8 @@ Grafieken die je vaak gebruikt kun je vastzetten op een Dashboard.
 - ✅ Fase 4 — vastgezette grafieken op een sleepbaar Dashboard (queries blijven
   vers omdat ze opnieuw gedraaid worden bij het laden)
 - ✅ Fase 5 — Ollama-provider met tool-calling voor lokale modellen
+- ✅ Fase 5b — UI om tijdens het chatten te wisselen tussen providers en
+  modellen (Claude / Ollama, met live model-lijst van Ollama)
 
 ## Snel beginnen
 
@@ -79,84 +81,157 @@ docker compose up --build -d
 Open http://localhost:8000. De image bundelt de gebouwde React-app, geserveerd
 door FastAPI.
 
-## Lokaal LLM op een Raspberry Pi 5 + AI Hat+ 2
+## Tijdens chatten van provider en model wisselen
 
-De agent praat met elke LLM-aanbieder via dezelfde `LLMProvider`-interface
-(`backend/app/llm/provider.py`). Switchen tussen Claude en Ollama is één
-env-variabele, geen herbouw.
+Onder de chat-invoer staan twee dropdowns:
 
-### Ollama op de Pi opzetten
+- **Provider** — *Claude (cloud)* of *Ollama (lokaal)*. Een provider die niet
+  bereikbaar is (geen API key, of Ollama draait niet) staat grijs en kan niet
+  gekozen worden.
+- **Model** — voor Claude een vaste lijst (Opus 4.7 / 4.6, Sonnet 4.6,
+  Haiku 4.5). Voor Ollama de live lijst van modellen die je op de host hebt
+  gepulled (live opgehaald via `/api/tags`).
 
-1. **Installeer Ollama** op de Pi (Pi OS 64-bit, 8 GB RAM aanbevolen):
+Je keuze persisteert in `localStorage`, dus na een refresh begin je weer met
+dezelfde combinatie. De **🧠 Diep nadenken**-knop wordt automatisch grijs als
+Ollama actief is — `effort` is een Anthropic-feature.
 
-   ```bash
-   curl -fsSL https://ollama.com/install.sh | sh
-   ```
+In de "stappen"-strook bovenaan elk antwoord zie je `model: <X>` zodat je
+direct kunt verifiëren welke combinatie je vraag heeft beantwoord.
 
-2. **Stel hem bloot aan je LAN** zodat het HouseDataBrowser-Docker-container
-   hem kan bereiken (default luistert Ollama alleen op localhost):
+## De hele app op een Raspberry Pi 5 draaien
 
-   ```bash
-   sudo systemctl edit ollama.service
-   # Voeg toe:
-   #   [Service]
-   #   Environment="OLLAMA_HOST=0.0.0.0:11434"
-   sudo systemctl restart ollama
-   ```
+Je kunt de complete stack (FastAPI backend + statisch geserveerde React UI)
+op een Pi 5 draaien via Docker. Co-locatie met Ollama op dezelfde Pi maakt
+het hele systeem volledig lokaal.
 
-3. **Trek een tool-calling model**. Aanbevelingen voor de Pi 5 (CPU, geen GPU):
+### Hardware aanbevelingen
 
-   | Model | Grootte | Tool-use kwaliteit | Geheugen |
-   |---|---|---|---|
-   | `qwen2.5:3b-instruct` | 1.9 GB | Goed | ~2.5 GB |
-   | `qwen2.5:7b-instruct` | 4.4 GB | Heel goed | ~5.5 GB |
-   | `llama3.1:8b-instruct-q4_K_M` | 4.9 GB | Goed | ~6 GB |
+- **Pi 5 met 8 GB RAM** — minimum als je naast de webapp ook Ollama wilt
+  draaien (`qwen2.5:3b-instruct` heeft ~2.5 GB nodig, de webapp ~300 MB,
+  Pi OS zelf ~700 MB; daarmee blijft 4 GB over voor cache en burst-vraag).
+  4 GB Pi 5 werkt voor enkel de webapp + cloud Claude, niet voor lokaal LLM.
+- **Snelle SD-kaart of NVMe** — `state.db` (SQLite) is klein maar krijgt veel
+  schrijfacties tijdens schema-ontdekking. NVMe via de Pi 5 M.2-hat is
+  comfortabeler maar niet vereist.
 
-   ```bash
-   ollama pull qwen2.5:3b-instruct
-   ```
+### Stap 1 — Pi OS 64-bit + Docker
 
-   Kleinere modellen passen in 4 GB RAM maar zijn merkbaar minder goed in
-   tool-calling. Begin met `qwen2.5:3b-instruct` en upgrade als nodig.
+```bash
+# Pi OS 64-bit Bookworm-Lite is genoeg (geen desktop nodig)
+sudo apt update && sudo apt install -y git
+curl -fsSL https://get.docker.com | sudo sh
+sudo usermod -aG docker $USER
+newgrp docker  # of opnieuw inloggen
+```
 
-4. **Test vanaf je Mac** dat Ollama bereikbaar is:
+### Stap 2 — Repo klonen en configureren
 
-   ```bash
-   curl http://pi.local:11434/api/tags
-   ```
+```bash
+git clone https://github.com/ruiterer/HouseDataBrowser.git
+cd HouseDataBrowser
+cp .env.example .env
+nano .env
+```
 
-### HouseDataBrowser naar de Pi laten wijzen
+Pas `.env` aan voor de Pi:
 
-Pas in `.env` aan:
+- `INFLUX_HOST` → het LAN-IP (of hostname) van je InfluxDB-machine.
+- `LLM_PROVIDER` → `claude` (cloud, snelste antwoorden) of `ollama` (volledig
+  lokaal). Je kunt later in de UI per vraag wisselen.
+- Voor Claude: `ANTHROPIC_API_KEY=sk-ant-...`
+- Voor lokaal Ollama op dezelfde Pi: `OLLAMA_HOST=http://172.17.0.1:11434`
+  (172.17.0.1 is het Docker-bridge-adres van de host vanuit de container —
+  zie ook hieronder).
+
+### Stap 3 — Bouwen en starten
+
+```bash
+docker compose up --build -d
+docker compose logs -f app
+```
+
+De eerste build duurt op een Pi 5 ~5–8 minuten (npm install + Python
+dependencies installeren). Daarna boot de container in seconden.
+
+Test: `curl http://<pi-ip>:8000/api/health` → moet `{"status": "ok", ...}`
+teruggeven.
+
+Vanaf elke browser op je netwerk: `http://<pi-ip>:8000/`.
+
+### Stap 4 (optioneel) — Ollama op dezelfde Pi co-loceren
+
+Als je volledig lokaal wilt draaien (geen cloud-rondtrip naar Anthropic),
+zet Ollama bovenop dezelfde Pi:
+
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+sudo systemctl edit ollama.service
+# Voeg toe en sla op:
+#   [Service]
+#   Environment="OLLAMA_HOST=0.0.0.0:11434"
+sudo systemctl restart ollama
+ollama pull qwen2.5:3b-instruct
+```
+
+Voor `OLLAMA_HOST` in `.env` heb je twee opties:
+
+- **Docker-bridge** (default Docker netwerk): `http://172.17.0.1:11434`. Dit
+  werkt zonder extra netwerk-config, omdat 172.17.0.1 vanuit de container het
+  host-IP is.
+- **`network_mode: host`** in `docker-compose.yml`: dan is `localhost:11434`
+  in de container hetzelfde als op de Pi zelf. Eenvoudiger maar de container
+  deelt dan het hele host-netwerk.
+
+Aanbeveling: blijf bij de default bridge en gebruik `http://172.17.0.1:11434`.
+
+### Wat te verwachten qua performance
+
+| Wat | Tijd op Pi 5 (CPU) |
+|---|---|
+| Eerste schema-ontdekking (562 metingen, sequentieel) | ~30–45 sec |
+| Volgende vernieuwing (zelfde data) | ~25–40 sec |
+| Eenvoudige vraag via Claude (cloud) | ~3–8 sec |
+| Eenvoudige vraag via Ollama `qwen2.5:3b` op de Pi | ~15–40 sec |
+| Complexe vraag met meerdere queries via Claude `effort=max` | ~20–60 sec |
+| Complexe vraag via Ollama `qwen2.5:3b` | vaak onbruikbaar — kies een 7B+ model of wissel naar Claude |
+
+De webapp zelf is razendsnel (de bottleneck zit altijd bij de LLM en de
+InfluxDB). De Pi gebruikt onder normale belasting ~5% CPU; alleen Ollama
+zelf piekt naar 100% tijdens generatie.
+
+### Updaten
+
+```bash
+cd ~/HouseDataBrowser
+git pull
+docker compose up --build -d
+```
+
+Schemacache, gesprekken, en vastgezette grafieken (`./data/state.db`)
+overleven een rebuild — de volume-mount in `docker-compose.yml` regelt dat.
+
+## Pi-only-Ollama (webapp elders)
+
+Als je de webapp op je Mac/desktop laat draaien en alleen Ollama op de Pi wilt
+hosten, doe stap 4 uit "De hele app op een Raspberry Pi 5 draaien" hierboven
+voor de Ollama-installatie, en zet in `.env` op je Mac:
 
 ```env
-LLM_PROVIDER=ollama
+LLM_PROVIDER=ollama          # Of houd 'claude' en kies Ollama in de UI
 OLLAMA_HOST=http://pi.local:11434
 OLLAMA_MODEL=qwen2.5:3b-instruct
 ```
 
-Herstart de backend (uvicorn `--reload` pakt de wijziging op). De badge
-rechtsboven verandert naar `influx ✓ · ollama` en de "stappen"-strook bovenaan
-elk antwoord toont nu `model: qwen2.5:3b-instruct`.
+Vanaf nu kun je in de UI vrij wisselen: een snelle vraag via Claude, een
+gevoelige vraag via Ollama op de Pi.
 
-### Wat te verwachten
+### AI Hat+ 2
 
-- **Snelheid**: een eenvoudige vraag op `qwen2.5:3b-instruct` op een Pi 5 duurt
-  ~10-30 seconden (versus ~5 sec op Claude). De `Diep nadenken`-knop heeft op
-  Ollama geen effect — `effort` is een Anthropic-feature.
-- **Kwaliteit**: kleinere modellen kunnen vragen vertalen die exact één meting
-  raken. Voor complexe vragen (multi-meting joins, ambigue intentie) is Claude
-  duidelijk sterker. Voor de meeste alledaagse vragen volstaat een Pi-model.
-- **AI Hat+ 2**: de Hailo-accelerator is geweldig voor vision, maar er is nog
-  geen volwassen LLM-pipeline voor. Ollama draait op de Pi-CPU; de Hat is
-  reserveerbaar voor andere taken.
-
-### Tussen providers wisselen tijdens gebruik
-
-Verander gewoon `LLM_PROVIDER` en herstart de backend. Bestaande gesprekken
-worden gewoon opgepakt door de nieuwe provider — alleen de tekstsamenvatting +
-InfluxQL gaan terug in de geschiedenis (niet de tool-call-trace), dus
-follow-ups blijven coherent.
+De Hailo-accelerator op de AI Hat+ 2 is geweldig voor vision-modellen, maar
+er is nog geen volwassen pipeline om er moderne tool-calling-LLMs op te
+draaien. Ollama gebruikt de Pi-CPU; de Hat blijft beschikbaar voor andere
+taken.
 
 ## Projectopzet
 
@@ -172,7 +247,8 @@ backend/
       provider.py        # Stabiele Protocol — keep backwards-compatible
       claude.py          # Anthropic SDK + adaptive thinking + prompt caching
       ollama.py          # Native /api/chat with tool calling
-      factory.py         # Picks provider from settings
+      factory.py         # Picks provider from settings (used by registry)
+      registry.py        # Houdt beide providers in geheugen voor UI-switching
     agent/
       system_prompt.py   # Composer (Dutch + cached schema overview)
       tools.py           # get_schema_for, run_influxql, render_response
@@ -182,6 +258,7 @@ backend/
       health.py
       schema.py
       pins.py            # Dashboard pinning
+      providers.py       # Lijst van beschikbare LLM-providers + modellen
       results.py
     state/
       models.py          # Conversation, ConversationMessage, PinnedChart, ...
@@ -192,7 +269,8 @@ backend/
 frontend/
   src/
     pages/               # Chat, Dashboard, Schema
-    components/          # ChartRenderer, DataTable, ChatThread, PinButton, ...
+    components/          # ChartRenderer, DataTable, ChatThread, PinButton,
+                         # ProviderPicker, ...
 .env.example
 Dockerfile               # Multi-stage: node build -> python runtime
 docker-compose.yml

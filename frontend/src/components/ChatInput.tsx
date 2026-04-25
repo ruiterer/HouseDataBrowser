@@ -4,9 +4,19 @@ type Props = {
   onSend: (text: string, opts: { deep: boolean }) => void;
   disabled?: boolean;
   placeholder?: string;
+  deepDisabled?: boolean;
+  deepDisabledReason?: string;
+  toolbar?: React.ReactNode;
 };
 
-export default function ChatInput({ onSend, disabled, placeholder }: Props) {
+export default function ChatInput({
+  onSend,
+  disabled,
+  placeholder,
+  deepDisabled,
+  deepDisabledReason,
+  toolbar,
+}: Props) {
   const [text, setText] = useState("");
   const [deep, setDeep] = useState(false);
   const ref = useRef<HTMLTextAreaElement>(null);
@@ -18,7 +28,7 @@ export default function ChatInput({ onSend, disabled, placeholder }: Props) {
   function send() {
     const t = text.trim();
     if (!t || disabled) return;
-    onSend(t, { deep });
+    onSend(t, { deep: deep && !deepDisabled });
     setText("");
     // Diep-modus is een eenmalige boost — automatisch uit na verzenden
     setDeep(false);
@@ -48,15 +58,20 @@ export default function ChatInput({ onSend, disabled, placeholder }: Props) {
         </button>
       </div>
       <div className="chat-input-options">
+        {toolbar}
         <label
-          className={`deep-toggle ${deep ? "on" : ""}`}
-          title="Forceert maximale denktijd voor deze ene vraag — gebruik voor complexe vragen die meerdere measurements moeten combineren of waar Claude vaker fout gaat."
+          className={`deep-toggle ${deep && !deepDisabled ? "on" : ""}`}
+          title={
+            deepDisabled
+              ? deepDisabledReason ?? "Niet beschikbaar voor deze provider."
+              : "Forceert maximale denktijd voor deze ene vraag — gebruik voor complexe vragen die meerdere measurements moeten combineren of waar Claude vaker fout gaat."
+          }
         >
           <input
             type="checkbox"
-            checked={deep}
+            checked={deep && !deepDisabled}
             onChange={(e) => setDeep(e.target.checked)}
-            disabled={disabled}
+            disabled={disabled || deepDisabled}
           />
           <span>🧠 Diep nadenken (langzamer, grondiger)</span>
         </label>

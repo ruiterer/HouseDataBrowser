@@ -40,6 +40,7 @@ class ChatRequest(BaseModel):
     message: str
     title_hint: str | None = None
     deep: bool = False  # When true, use effort=max for this single message
+    provider: str | None = None  # Optional per-request provider override
     model: str | None = None  # Optional per-request model override
 
 
@@ -128,9 +129,14 @@ async def delete_conversation(conversation_id: str, request: Request) -> dict[st
 async def chat(body: ChatRequest, request: Request):
     engine = request.app.state.db_engine
     settings = request.app.state.settings
-    provider = request.app.state.llm
+    registry = request.app.state.registry
     influx = request.app.state.influx
     results = request.app.state.results
+
+    try:
+        provider = registry.get(body.provider)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
     with Session(engine) as session:
         if body.conversation_id:

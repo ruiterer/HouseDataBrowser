@@ -242,6 +242,27 @@ body { background: var(--bg); color: var(--text); }
   color: var(--accent); background: rgba(79, 140, 255, 0.1);
 }
 .deep-toggle input { margin: 0; }
+.deep-toggle input:disabled + span { opacity: 0.5; }
+
+.provider-picker {
+  display: inline-flex; align-items: center; gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.picker-label {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  font-size: 0.8rem; color: var(--muted);
+}
+.picker-label select {
+  background: var(--bg); color: var(--text);
+  border: 1px solid var(--border); border-radius: 4px;
+  padding: 0.2rem 0.4rem; font-size: 0.85rem;
+  font-family: ui-monospace, monospace;
+  max-width: 220px;
+}
+.picker-label select:disabled { opacity: 0.5; }
+.picker-error {
+  font-size: 0.75rem; color: var(--bad);
+}
 
 /* Tables */
 .table-wrap { margin-top: 0.5rem; }

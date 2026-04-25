@@ -8,6 +8,7 @@ import {
 import ChatInput from "../components/ChatInput";
 import ChatThread from "../components/ChatThread";
 import ConversationSidebar from "../components/ConversationSidebar";
+import ProviderPicker, { type Selection } from "../components/ProviderPicker";
 import type { LiveAssistantMessage } from "../components/ChatMessage";
 import type { ChartSpec } from "../components/ChartRenderer";
 
@@ -16,6 +17,7 @@ export default function Chat() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [pendingUser, setPendingUser] = useState<string | null>(null);
   const [live, setLive] = useState<LiveAssistantMessage | null>(null);
+  const [selection, setSelection] = useState<Selection | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   const { data: convo } = useQuery({
@@ -48,6 +50,8 @@ export default function Chat() {
           conversationId: activeId,
           message: text,
           deep: opts.deep,
+          provider: selection?.provider ?? null,
+          model: selection?.model ?? null,
           signal: ac.signal,
           onEvent: (ev) => {
             if (ev.event === "conversation") {
@@ -143,7 +147,7 @@ export default function Chat() {
         setLive((m) => (m ? { ...m, status: "error", errorMessage: String(err) } : m));
       }
     },
-    [activeId, live, qc],
+    [activeId, live, qc, selection],
   );
 
   useEffect(() => () => abortRef.current?.abort(), []);
@@ -153,7 +157,19 @@ export default function Chat() {
       <ConversationSidebar activeId={activeId} onSelect={onSelect} />
       <section className="chat-main">
         <ChatThread messages={messages} pendingUser={pendingUser} live={live} />
-        <ChatInput onSend={send} disabled={live?.status === "running"} />
+        <ChatInput
+          onSend={send}
+          disabled={live?.status === "running"}
+          deepDisabled={selection?.provider === "ollama"}
+          deepDisabledReason="Diep nadenken werkt alleen op Claude (lokale modellen kennen geen effort-niveaus)."
+          toolbar={
+            <ProviderPicker
+              value={selection}
+              onChange={setSelection}
+              disabled={live?.status === "running"}
+            />
+          }
+        />
       </section>
     </div>
   );

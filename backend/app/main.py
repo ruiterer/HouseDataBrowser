@@ -11,11 +11,12 @@ from fastapi.staticfiles import StaticFiles
 from app.api.chat import router as chat_router
 from app.api.health import router as health_router
 from app.api.pins import router as pins_router
+from app.api.providers import router as providers_router
 from app.api.results import router as results_router
 from app.api.schema import router as schema_router
 from app.config import get_settings
 from app.influx.client import InfluxClient
-from app.llm.factory import make_provider
+from app.llm.registry import ProviderRegistry
 from app.state.db import init_schema, make_engine
 from app.state.refresh import SchemaRefresher
 from app.state.results import ResultCache
@@ -42,12 +43,16 @@ async def lifespan(app: FastAPI):
 
     app.state.results = ResultCache(ttl_seconds=settings.results_ttl_seconds)
 
+    registry = ProviderRegistry(settings)
+    app.state.registry = registry
+    # Default LLM kept for legacy code paths (health endpoint, etc.) — chat
+    # routes resolve per-request through the registry.
     try:
-        app.state.llm = make_provider(settings)
-        logger.info("LLM provider ready: %s (%s)", app.state.llm.name, app.state.llm.model)
+        app.state.llm = registry.get(settings.llm_provider)
+        logger.info("default LLM: %s (%s)", app.state.llm.name, app.state.llm.model)
     except Exception as exc:
         app.state.llm = None
-        logger.warning("LLM provider unavailable: %s", exc)
+        logger.warning("default LLM unavailable: %s", exc)
 
     logger.info(
         "Started — InfluxDB target %s:%s/%s, LLM %s, state DB %s",
@@ -80,6 +85,7 @@ def create_app() -> FastAPI:
     app.include_router(chat_router)
     app.include_router(results_router)
     app.include_router(pins_router)
+    app.include_router(providers_router)
 
     static_dir = Path(__file__).resolve().parents[1] / "static"
     if static_dir.exists():
