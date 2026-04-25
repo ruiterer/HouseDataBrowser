@@ -1,10 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Node
 node_modules/
-.env
-.env.local
-.DS_Store
-*.log
 dist/
 build/
+
+# App
+backend/static/
+data/
+*.db
+*.log
+
+# Env
+.env
+.env.local
+
+# Editor / OS
+.DS_Store
 .vscode/
 .idea/
 *.swp

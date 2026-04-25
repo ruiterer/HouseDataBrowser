@@ -1,0 +1,21 @@
+services:
+  app:
+    build: .
+    image: housedatabrowser:latest
+    container_name: housedatabrowser
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/backend/data
+    # If your InfluxDB container is on a custom Docker network, attach to it
+    # here so INFLUX_HOST can be the InfluxDB service name. Otherwise keep
+    # INFLUX_HOST set to the LAN IP/hostname of the InfluxDB host.
+    # networks:
+    #   - influx_net
+
+# networks:
+#   influx_net:
+#     external: true
