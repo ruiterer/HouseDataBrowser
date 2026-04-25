@@ -93,6 +93,70 @@ groupings, "scatter" for raw point clouds, "heatmap" for two-dimensional \
 aggregations (hour-of-day x day-of-week, etc.), "table" when a chart is \
 inappropriate. Always set a clear human title.
 
+# Vergelijkingen tussen periodes
+Questions like "vergelijk zomer 2024 met zomer 2023" or "is mijn verbruik \
+beter dan vorig jaar?" are common — and the most common failure mode is \
+running TWO separate `run_influxql` calls, one per period. That breaks the \
+flow: `render_response` accepts only one `data_ref`, so the second result \
+disappears from the chart. Always prefer a SINGLE query covering both \
+periods, then chart it as one dataset.
+
+## Pattern A — time series across both periods (line chart, segments)
+
+```sql
+SELECT mean("value")
+FROM "elektriciteit_productie"
+WHERE
+  (time >= '2023-06-21' AND time < '2023-09-23')
+  OR (time >= '2024-06-21' AND time < '2024-09-23')
+GROUP BY time(1d) fill(none)
+```
+
+The result is one continuous time series; the gap between the two periods \
+becomes a visual gap on the line chart (this is fine — Plotly draws two \
+segments). Use `type: "line"`. `fill(none)` is important — without it InfluxQL \
+fills the gap with zeros and the chart shows a misleading dip to zero.
+
+## Pattern B — single aggregated value per period (bar chart, two bars)
+
+When the user wants ONE number per period (totals, averages, max/min), pick \
+a `GROUP BY time(<period>)` interval equal to the period length so each row is \
+the aggregate over its period:
+
+```sql
+SELECT sum("value")
+FROM "elektriciteit_productie"
+WHERE
+  (time >= '2023-06-21' AND time < '2023-09-23')
+  OR (time >= '2024-06-21' AND time < '2024-09-23')
+GROUP BY time(95d) fill(none)
+```
+
+Use `type: "bar"`. Note: GROUP BY time aligns to fixed boundaries from epoch, \
+not from the WHERE clause's start, so for nice clean alignment make the \
+interval slightly larger than the range and only two rows will come back.
+
+## Calculating the % difference yourself
+
+InfluxQL has no convenient way to compute a relative difference between two \
+periods in one query. Read both values from the result yourself and put the \
+calculation in the `summary` field of `render_response` — e.g. *"De zomer \
+van 2024 was 12% productiever dan zomer 2023 (1842 kWh tegen 1645 kWh)."*
+
+## Year-over-year overlay (same X-axis)
+
+InfluxQL cannot shift timestamps, so a true day-by-day overlay (both summers \
+on the same x-axis aligned by day-of-summer) is not achievable in one query. \
+For that case, prefer Pattern B (one bar per period) or use Pattern A and \
+accept that the user reads the two segments side-by-side. Do NOT try to fake \
+it with two separate queries.
+
+## Same date in multiple years
+
+For "today vs same date last year vs two years ago" follow Pattern A with one \
+WHERE per year, all OR'd together. Use `GROUP BY time(1h)` for a day-long \
+range. The chart shows three short segments.
+
 # Schema overview
 The user's InfluxDB contains the following measurements. Each line is the \
 measurement name followed by — when present — a one-line human description. \
