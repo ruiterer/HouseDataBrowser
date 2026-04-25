@@ -46,8 +46,12 @@ class InfluxClient:
         result = await asyncio.to_thread(self._client.query, validated.sql)
         series: list[dict[str, Any]] = []
         rowcount = 0
-        for points_iter, meta in result.items():
-            measurement, tags = meta if isinstance(meta, tuple) else (meta, None)
+        # influxdb-python's ResultSet.items() yields ((measurement, tags), iterator).
+        for meta, points_iter in result.items():
+            if isinstance(meta, tuple):
+                measurement, tags = meta
+            else:
+                measurement, tags = meta, None
             points = list(points_iter)
             rowcount += len(points)
             series.append(

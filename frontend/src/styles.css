@@ -51,3 +51,66 @@ body { background: var(--bg); color: var(--text); }
   padding: 2rem;
   color: var(--muted);
 }
+
+/* Schema page */
+.schema-page { max-width: 960px; margin: 0 auto; }
+.schema-header h2 { margin: 0 0 0.5rem; }
+.schema-meta {
+  display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;
+  color: var(--muted); font-size: 0.9rem; margin-bottom: 0.75rem;
+}
+.schema-meta .refreshing { color: var(--accent); }
+.schema-meta .error { color: var(--bad); }
+.schema-meta button {
+  background: var(--panel); color: var(--text); border: 1px solid var(--border);
+  padding: 0.25rem 0.75rem; border-radius: 4px; cursor: pointer;
+}
+.schema-meta button:disabled { opacity: 0.5; cursor: not-allowed; }
+.schema-filter {
+  width: 100%; padding: 0.5rem 0.75rem; margin-bottom: 1rem;
+  background: var(--panel); color: var(--text);
+  border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem;
+}
+.schema-filter:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+
+.schema-list { list-style: none; padding: 0; margin: 0; }
+.schema-card {
+  border: 1px solid var(--border); border-radius: 8px;
+  margin-bottom: 0.5rem; overflow: hidden; background: var(--panel);
+}
+.schema-card-header {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.75rem 1rem; cursor: pointer; user-select: none;
+}
+.schema-card-header:hover { background: rgba(255, 255, 255, 0.03); }
+.schema-card-header .name { flex: 1; font-weight: 500; font-family: ui-monospace, monospace; }
+.schema-card-header .counts { color: var(--muted); font-size: 0.85rem; }
+.schema-card-header .caret { color: var(--muted); width: 1rem; }
+
+.schema-card-body { padding: 0 1rem 1rem 2rem; border-top: 1px solid var(--border); }
+.schema-row { margin-top: 0.75rem; }
+.schema-row label {
+  display: block; font-size: 0.8rem; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;
+}
+
+.display-row { display: flex; gap: 0.75rem; align-items: flex-start; }
+.display-row .description { flex: 1; margin: 0; }
+.display-row button, .edit-actions button {
+  background: var(--panel); color: var(--text); border: 1px solid var(--border);
+  padding: 0.25rem 0.75rem; border-radius: 4px; cursor: pointer; font-size: 0.85rem;
+}
+.edit-row { display: flex; flex-direction: column; gap: 0.5rem; }
+.edit-row textarea {
+  background: var(--bg); color: var(--text); border: 1px solid var(--border);
+  border-radius: 4px; padding: 0.5rem; font-family: inherit; resize: vertical;
+}
+.edit-actions { display: flex; gap: 0.5rem; }
+
+.key-list { margin: 0; padding-left: 1.25rem; }
+.key-list li { margin: 0.15rem 0; }
+.key-list code {
+  background: var(--bg); padding: 0.1rem 0.35rem; border-radius: 3px;
+  font-size: 0.85rem;
+}
+.muted { color: var(--muted); }

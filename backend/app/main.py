@@ -9,8 +9,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.api.health import router as health_router
+from app.api.schema import router as schema_router
 from app.config import get_settings
 from app.influx.client import InfluxClient
+from app.state.db import init_schema, make_engine
+from app.state.refresh import SchemaRefresher
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s | %(message)s")
 logger = logging.getLogger(__name__)
@@ -20,18 +23,31 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     settings = get_settings()
     app.state.settings = settings
-    app.state.influx = InfluxClient(settings)
+
+    engine = make_engine(settings)
+    init_schema(engine)
+    app.state.db_engine = engine
+
+    influx = InfluxClient(settings)
+    app.state.influx = influx
+
+    refresher = SchemaRefresher(engine=engine, influx=influx)
+    app.state.refresher = refresher
+    refresher.start()
+
     logger.info(
-        "Started — InfluxDB target %s:%s/%s, LLM provider %s",
+        "Started — InfluxDB target %s:%s/%s, LLM provider %s, state DB %s",
         settings.influx_host,
         settings.influx_port,
         settings.influx_database,
         settings.llm_provider,
+        settings.state_db_path,
     )
     try:
         yield
     finally:
-        app.state.influx.close()
+        await refresher.stop()
+        influx.close()
 
 
 def create_app() -> FastAPI:
@@ -46,6 +62,7 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(health_router)
+    app.include_router(schema_router)
 
     static_dir = Path(__file__).resolve().parents[1] / "static"
     if static_dir.exists():
