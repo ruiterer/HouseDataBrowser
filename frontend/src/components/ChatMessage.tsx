@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchResult, type ConversationMessage } from "../api/chat";
 import ChartRenderer, { type ChartSpec } from "./ChartRenderer";
 import DataTable from "./DataTable";
+import Markdown from "./Markdown";
 import PinButton from "./PinButton";
 import QueryDebugPanel from "./QueryDebugPanel";
 
@@ -60,7 +61,9 @@ export default function ChatMessage({ msg }: Props) {
     <div className="msg msg-assistant">
       <div className="msg-role">HouseDataBrowser</div>
       <div className="msg-body">
-        {msg.final_summary && <p className="summary">{msg.final_summary}</p>}
+        {msg.final_summary && (
+          <Markdown className="summary" content={msg.final_summary} />
+        )}
         {msg.final_data_ref && msg.final_chart && (
           <ResultBlock
             dataRef={msg.final_data_ref}
@@ -109,7 +112,9 @@ function LiveMessage({ msg }: { msg: LiveAssistantMessage }) {
         {msg.errorMessage && <div className="error-banner">Fout: {msg.errorMessage}</div>}
         {final && (
           <>
-            {final.summary && <p className="summary">{final.summary}</p>}
+            {final.summary && (
+              <Markdown className="summary" content={final.summary} />
+            )}
             {final.data_ref && final.chart && (
               <ResultBlock dataRef={final.data_ref} chart={final.chart} />
             )}
