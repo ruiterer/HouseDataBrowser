@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   fetchSchema,
@@ -87,6 +88,7 @@ export default function Schema() {
 
 function MeasurementCard({ m }: { m: Measurement }) {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(m.description);
   const [editing, setEditing] = useState(false);
@@ -98,6 +100,11 @@ function MeasurementCard({ m }: { m: Measurement }) {
       qc.invalidateQueries({ queryKey: ["schema"] });
     },
   });
+
+  function askAboutField(fieldName: string) {
+    const prefill = `Laat de waarde van \`${fieldName}\` op meting \`${m.measurement}\` zien voor de afgelopen 30 dagen.`;
+    navigate("/", { state: { prefill, freshConversation: true } });
+  }
 
   return (
     <li className={`schema-card ${open ? "open" : ""}`}>
@@ -149,7 +156,14 @@ function MeasurementCard({ m }: { m: Measurement }) {
             <ul className="key-list">
               {m.field_keys.map((fk) => (
                 <li key={fk.name}>
-                  <code>{fk.name}</code> <span className="muted">({fk.type})</span>
+                  <button
+                    className="field-pick"
+                    onClick={() => askAboutField(fk.name)}
+                    title={`Stel een vraag over ${fk.name} in een nieuw gesprek`}
+                  >
+                    <code>{fk.name}</code> <span className="muted">({fk.type})</span>
+                    <span className="field-pick-hint">💬</span>
+                  </button>
                 </li>
               ))}
               {m.field_keys.length === 0 && <li className="muted">geen</li>}

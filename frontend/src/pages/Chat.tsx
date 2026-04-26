@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getConversation,
@@ -14,11 +15,34 @@ import type { ChartSpec } from "../components/ChartRenderer";
 
 export default function Chat() {
   const qc = useQueryClient();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [pendingUser, setPendingUser] = useState<string | null>(null);
   const [live, setLive] = useState<LiveAssistantMessage | null>(null);
   const [selection, setSelection] = useState<Selection | null>(null);
+  const [prefillText, setPrefillText] = useState("");
+  const [prefillKey, setPrefillKey] = useState(0);
   const abortRef = useRef<AbortController | null>(null);
+
+  // Handoff from /schema: location.state may carry { prefill, freshConversation }
+  useEffect(() => {
+    const state = location.state as
+      | { prefill?: string; freshConversation?: boolean }
+      | null;
+    if (!state?.prefill) return;
+    if (state.freshConversation) {
+      abortRef.current?.abort();
+      abortRef.current = null;
+      setActiveId(null);
+      setPendingUser(null);
+      setLive(null);
+    }
+    setPrefillText(state.prefill);
+    setPrefillKey((k) => k + 1);
+    // Wipe the state so a refresh or back-navigation doesn't re-trigger.
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.state, location.pathname, navigate]);
 
   const { data: convo } = useQuery({
     queryKey: ["conversation", activeId],
@@ -158,6 +182,8 @@ export default function Chat() {
       <section className="chat-main">
         <ChatThread messages={messages} pendingUser={pendingUser} live={live} />
         <ChatInput
+          key={prefillKey}
+          initialText={prefillText}
           onSend={send}
           disabled={live?.status === "running"}
           deepDisabled={selection?.provider === "ollama"}

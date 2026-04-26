@@ -7,6 +7,7 @@ type Props = {
   deepDisabled?: boolean;
   deepDisabledReason?: string;
   toolbar?: React.ReactNode;
+  initialText?: string;
 };
 
 export default function ChatInput({
@@ -16,8 +17,9 @@ export default function ChatInput({
   deepDisabled,
   deepDisabledReason,
   toolbar,
+  initialText,
 }: Props) {
-  const [text, setText] = useState("");
+  const [text, setText] = useState(initialText ?? "");
   const [deep, setDeep] = useState(false);
   const ref = useRef<HTMLTextAreaElement>(null);
 
