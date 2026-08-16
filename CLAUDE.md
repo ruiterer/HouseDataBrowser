@@ -1,78 +1,31 @@
-# CLAUDE.md
+<!-- portfolio-template: v1 -->
+<!-- base-start -->
+## Portfolio-basisregels (golden template v1)
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+- Communiceer met Erik in het Nederlands; code, identifiers en commits in het
+  Engels. (Wijkt dit project bewust af? Zet de afwijking onder
+  "Projectafspraken" hieronder — de afwijking wint.)
+- Secrets staan nooit in de repo of in context: gebruik `~/.config/…`, de
+  macOS Keychain of een gitignored `.env`. De portfolio-scan bewaakt dit.
+- Gebruik altijd de interpreter/venv van het project zelf, nooit
+  systeem-Python.
+- Draai de projecttests vóór elke commit; wat afdwingbaar is zit in hooks/CI,
+  niet in dit bestand.
+- Engineeringprincipes (verkort; reden: gedrags-guardrail voor modelgeneraties
+  t/m Claude 4.x, herbeoordelen bij elke grote modelrelease — D-002 in
+  Portfolio_Manager): denk eerst na en benoem aannames; minimale oplossing,
+  niets speculatiefs; raak alleen wat de taak vereist; formuleer een toetsbaar
+  succescriterium en verifieer het resultaat.
+- Verouderende feiten (modelnamen, API-gedrag, statusdatums) horen in
+  config/README, niet in dit bestand.
+<!-- base-end -->
 
-## Coding guidelines
+# HouseDataBrowser
 
-Behavioral guidelines to reduce common LLM coding mistakes. Merge with the
-project-specific instructions below as needed.
+## Projectafspraken
 
-**Tradeoff:** These guidelines bias toward caution over speed. For trivial
-tasks, use judgment.
-
-### 1. Think Before Coding
-
-**Don't assume. Don't hide confusion. Surface tradeoffs.**
-
-Before implementing:
-- State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them — don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
-
-### 2. Simplicity First
-
-**Minimum code that solves the problem. Nothing speculative.**
-
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
-
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes,
-simplify.
-
-### 3. Surgical Changes
-
-**Touch only what you must. Clean up only your own mess.**
-
-When editing existing code:
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
-- Match existing style, even if you'd do it differently.
-- If you notice unrelated dead code, mention it — don't delete it.
-
-When your changes create orphans:
-- Remove imports/variables/functions that YOUR changes made unused.
-- Don't remove pre-existing dead code unless asked.
-
-The test: every changed line should trace directly to the user's request.
-
-### 4. Goal-Driven Execution
-
-**Define success criteria. Loop until verified.**
-
-Transform tasks into verifiable goals:
-- "Add validation" → "Write tests for invalid inputs, then make them pass"
-- "Fix the bug" → "Write a test that reproduces it, then make it pass"
-- "Refactor X" → "Ensure tests pass before and after"
-
-For multi-step tasks, state a brief plan:
-```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
-```
-
-Strong success criteria let you loop independently. Weak criteria ("make it
-work") require constant clarification.
-
-**These guidelines are working if:** fewer unnecessary changes in diffs, fewer
-rewrites due to overcomplication, and clarifying questions come before
-implementation rather than after mistakes.
-
----
+Geen afwijkingen van de basisregels. Aanvulling: de datalabels in InfluxDB
+zijn overwegend Nederlands; de agent citeert identifiers letterlijk.
 
 ## Project
 
@@ -222,19 +175,14 @@ in `data:` lines; the agent loop yields dicts and the API layer wraps with
   messages stay English. The agent's system prompt is English (Claude
   understands both); only the *example* output strings in the prompt are Dutch.
 
-- **No inline `#` comments after shell commands shown to the user** — Erik's
-  zsh doesn't have `interactive_comments` enabled, so `npm install # comment`
-  passes `# comment` to npm and fails. Put the explanation on a separate line
-  before the command.
+- **Effort levels** are enforced by the Pydantic `Literal` type in code — that
+  type is the source of truth for allowed values, not this file. Default is
+  `high`; the "🧠 Diep nadenken" UI toggle bumps a single message to the
+  highest allowed level. Disabled when Ollama is the active provider.
 
-- **Effort levels: `low | medium | high | max`** — `xhigh` is documented for
-  some clients but currently rejected by `/v1/messages`. The Pydantic Literal
-  type enforces this. Default is `high`; the "🧠 Diep nadenken" UI toggle
-  bumps a single message to `max`. Disabled when Ollama is the active
-  provider.
-
-- **Default model is `claude-opus-4-7`.** Don't downgrade unless the user
-  explicitly asks. The skill recommends Opus 4.7 for agentic tool-use.
+- **The default Claude model lives in config** (`.env` /
+  `registry.CLAUDE_MODELS`), not in this file — model names go stale. Don't
+  change or downgrade the configured default except on explicit request.
 
 - **Persist user feedback to memory** when learning a new preference. The
   memory store at `/Users/erik/.claude/projects/-Users-erik-GenAI-HouseDataBrowser/memory/`
