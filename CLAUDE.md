@@ -65,6 +65,19 @@ docker compose logs -f app
 The default `.env` lives at the repo root; `cp .env.example .env` to start. The
 backend reads it via Pydantic Settings.
 
+## Platform membership (machine platform, D-021/D-023)
+
+Member of the Mac platform at **minimal level**: `platform/manifest.toml`
+(installed copy in `~/.config/platform-hub/manifests/`). `proxy = false`
+(React SPA, not prefix-aware) with `lan = true`: the hub tile links to
+`http://<hostname>:8603/`. The Docker **host port moved 8000 → 8603**
+(8000 belongs to Transcriber_App — register: Portfolio_Manager
+`registry/ports.toml`); the container port stays 8000. The platform nav bar
+(`frontend/public/platform-header.js`, tag in `frontend/index.html`) ships
+with the next `docker compose up --build`. Moving the binding to 127.0.0.1
+behind the hub is deliberately deferred to this project's maintenance
+session — it requires making the SPA prefix-aware first.
+
 ## Architecture — what's load-bearing across files
 
 ### 1. The InfluxQL safety filter is THE security boundary

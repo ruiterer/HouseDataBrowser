@@ -1,0 +1,18 @@
+# Platform-manifest (bron). Installeren = kopiëren naar
+# ~/.config/platform-hub/manifests/housedata.toml.
+
+[tool]
+name = "housedata"
+project = "HouseDataBrowser"
+title = "HouseData Browser"
+goal = "Huis-sensordata bevragen in natuurlijke taal"
+port = 8603
+panel_path = "/"
+health_path = "/"
+blocks = []
+kit_version = "none"
+level = "minimal"
+# React-SPA, niet prefix-bewust (D-023) én bewust LAN-breed (Docker):
+# direct-link-tegel op basis van de hostnaam waarmee de hub is benaderd
+lan = true
+proxy = false

@@ -5,7 +5,7 @@ services:
     container_name: housedatabrowser
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "8603:8000"  # hostpoort 8603: 8000 botste met Transcriber_App (Portfolio_Manager registry/ports.toml)
     env_file:
       - .env
     volumes:
