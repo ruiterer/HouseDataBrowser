@@ -16,7 +16,6 @@ dependencies = [
     "sse-starlette>=2.1",
     "sqlmodel>=0.0.22",
     "alembic>=1.14",
-    "sentence-transformers>=3.3",
     "sqlparse>=0.5",
 ]
 
