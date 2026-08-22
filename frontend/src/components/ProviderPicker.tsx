@@ -98,7 +98,7 @@ export default function ProviderPicker({ value, onChange, disabled }: Props) {
 }
 
 function prettyProvider(p: ProviderInfo): string {
-  if (p.name === "claude") return "Claude (cloud)";
+  if (p.name === "claude") return "Claude Code (abonnement)";
   if (p.name === "ollama") return p.available ? "Ollama (lokaal)" : "Ollama — offline";
   return p.name;
 }

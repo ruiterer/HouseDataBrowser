@@ -94,10 +94,14 @@ for "internal" queries** — the tests assume it's the only path.
 ### 2. LLM provider abstraction is intentionally thin
 
 `backend/app/llm/provider.py` defines a `Protocol` with one async `chat(...)`
-method. `ClaudeProvider` and `OllamaProvider` implement it. The `ProviderRegistry`
-(`backend/app/llm/registry.py`) holds both at runtime — `claude` and `ollama`
-load independently and a missing API key or unreachable Ollama just marks that
-provider unavailable, never crashes the app.
+method, plus an optional episode capability (`runs_own_loop` +
+`run_episode(...)`) for engines that drive their own agent loop.
+`ClaudeCodeProvider` (Claude Code via the Agent SDK, subscription auth) uses
+the episode path; `OllamaProvider` uses per-turn `chat()`. The
+`ProviderRegistry` (`backend/app/llm/registry.py`) holds both at runtime —
+`claude` and `ollama` load independently and a missing
+`CLAUDE_CODE_OAUTH_TOKEN` or unreachable Ollama just marks that provider
+unavailable, never crashes the app.
 
 The chat endpoint resolves per-request via `body.provider`. **Agent code
 (`app/agent/`) never imports either implementation directly** — only the
@@ -105,11 +109,12 @@ The chat endpoint resolves per-request via `body.provider`. **Agent code
 changes outside `app/llm/` and the model lists in `registry.CLAUDE_MODELS` /
 the Ollama tag probe.
 
-Provider-specific features (Claude's adaptive thinking, prompt caching, the
-`effort` parameter) live entirely in `claude.py`. Ollama silently ignores
+Provider-specific features live entirely in `claude_code.py`. The Claude
+model list uses subscription aliases (`opus`/`sonnet`/`haiku`) that track the
+subscription's current models, so no stale IDs. Ollama silently ignores
 `effort`/`model` overrides it doesn't understand.
 
-### 3. The agent loop is a manual tool-use loop
+### 3. The agent loop has two paths: classic per-turn and episode delegation
 
 `backend/app/agent/loop.py` is the heart. Three tools defined in `tools.py`:
 - `get_schema_for(measurements)` — fetches tag/field details on demand
@@ -121,11 +126,19 @@ The loop yields SSE events (`agent_start`, `assistant_text`, `tool_call`,
 `render_response`, on `end_turn` with no tool calls, or when `max_agent_steps`
 is hit (configurable via `LLM_MAX_AGENT_STEPS`, default 12).
 
+For a `runs_own_loop` provider (Claude Code) the loop delegates the whole
+episode to `provider.run_episode(...)`: the SDK drives the agent loop as a
+subprocess, HDB's tools are in-process MCP tools, and **tool execution still
+happens in loop.py's handler callback** — the safety filter and terminal-tool
+bookkeeping are identical on both paths. Episode events are translated to the
+same SSE events, so `chat.py` persistence works unchanged.
+
 Two non-obvious quirks:
 
-- The Claude provider uses `messages.stream()` + `get_final_message()` instead
-  of `messages.create()`. This is required so we can use 64K `max_tokens`
-  without hitting the SDK's non-streaming HTTP timeout guard. Don't switch back.
+- Claude Code built-in tools (Bash/Read/Write/...) are disabled via
+  `tools=[]` + `allowed_tools=[mcp__hdb__*]` + `permission_mode="dontAsk"` in
+  `claude_code.py`. Don't loosen this — the InfluxQL safety filter is the
+  security boundary and the only tools the model may touch are HDB's three.
 
 - The agent's `final` event is emitted whether or not `render_response` was
   called. If Claude finishes without it, `_fallback_message(stop_reason)`

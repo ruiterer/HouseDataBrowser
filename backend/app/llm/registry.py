@@ -1,10 +1,11 @@
 """Provider registry.
 
-Holds one instance of every LLM provider the user has configured (Claude if
-ANTHROPIC_API_KEY is set, Ollama if OLLAMA_HOST is reachable). The chat
-endpoint resolves a per-request `provider` field through this registry.
+Holds one instance of every LLM provider the user has configured (Claude Code
+if CLAUDE_CODE_OAUTH_TOKEN is set, Ollama if OLLAMA_HOST is reachable). The
+chat endpoint resolves a per-request `provider` field through this registry.
 
-For Claude the model list is hard-coded — a curated set of current Anthropic IDs.
+For Claude Code the model list is the subscription aliases (opus/sonnet/haiku)
+— they track whatever the subscription's current models are, so no stale IDs.
 For Ollama we query /api/tags to surface whichever models the user has pulled
 locally; an unreachable Ollama just returns an empty list (the UI will then
 hide that option) without crashing the app.
@@ -18,21 +19,19 @@ from dataclasses import dataclass, field
 import httpx
 
 from app.config import Settings
-from app.llm.claude import ClaudeProvider
+from app.llm.claude_code import ClaudeCodeProvider
 from app.llm.ollama import OllamaProvider
 from app.llm.provider import LLMProvider
 
 logger = logging.getLogger(__name__)
 
-# First entry doubles as the fallback default when LLM_MODEL is not in the
-# list. claude-fable-5 (Mythos tier, 2x Opus pricing) requires the API org to
-# be on 30-day data retention; it is offered as a manual pick, not a default.
+# Claude Code model aliases: these resolve to the subscription's current model
+# of that tier, so the list never goes stale. The first entry doubles as the
+# fallback default when LLM_MODEL is not in the list.
 CLAUDE_MODELS: tuple[str, ...] = (
-    "claude-opus-5",
-    "claude-opus-4-8",
-    "claude-sonnet-5",
-    "claude-haiku-4-5",
-    "claude-fable-5",
+    "opus",
+    "sonnet",
+    "haiku",
 )
 
 
@@ -55,7 +54,7 @@ class ProviderRegistry:
 
     def _init_claude(self) -> None:
         try:
-            self._providers["claude"] = ClaudeProvider(self._settings)
+            self._providers["claude"] = ClaudeCodeProvider(self._settings)
             self._info["claude"] = ProviderInfo(
                 name="claude",
                 default_model=self._settings.llm_model

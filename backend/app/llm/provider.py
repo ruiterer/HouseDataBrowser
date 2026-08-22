@@ -8,6 +8,7 @@ change.
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Any, Literal, Protocol
 
@@ -80,3 +81,13 @@ class LLMProvider(Protocol):
         model: str | None = None,
         effort: str | None = None,
     ) -> AssistantTurn: ...
+
+
+# Optional capability on top of LLMProvider: a provider that drives the whole
+# agent episode itself (Claude Code via the Agent SDK). The agent loop checks
+# the `runs_own_loop` attribute and, when true, calls `run_episode()` instead
+# of driving per-turn chat() calls. Tool execution stays on the loop's side:
+# the provider calls back through an EpisodeToolHandler, which returns
+# (result_text, is_error). This keeps the safety filter and terminal-tool
+# bookkeeping in agent code, out of provider implementations.
+EpisodeToolHandler = Callable[[str, dict[str, Any]], Awaitable[tuple[str, bool]]]

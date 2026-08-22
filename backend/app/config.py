@@ -22,18 +22,18 @@ class Settings(BaseSettings):
     influx_row_limit: int = 50_000
 
     llm_provider: Literal["claude", "ollama"] = "claude"
-    llm_model: str = "claude-opus-5"
-    # Effort levels accepted by /v1/messages on current models (Opus 4.7+):
-    # low | medium | high | xhigh | max. Default high balances quality and
-    # token spend; the UI's "Diep nadenken" toggle bumps a message to max.
+    # Claude Code model alias (opus | sonnet | haiku): resolves to the
+    # subscription's current model of that tier, so it never goes stale.
+    llm_model: str = "opus"
+    # Effort levels supported by the Claude Agent SDK: low | medium | high |
+    # xhigh | max. Default high balances quality and usage-quota spend; the
+    # UI's "Diep nadenken" toggle bumps a message to max.
     llm_effort: Literal["low", "medium", "high", "xhigh", "max"] = "high"
-    # 64K is the recommended default for streaming requests — leaves room for
-    # thinking + tool calls + final response at high/max effort. We use
-    # streaming + get_final_message() in the Claude provider so this is safe.
-    llm_max_tokens: int = 64000
     llm_max_agent_steps: int = 12
 
-    anthropic_api_key: str | None = None
+    # Subscription OAuth token for the Claude Code provider; generate once
+    # with `claude setup-token` (valid ~1 year) and put it in .env.
+    claude_code_oauth_token: str | None = None
 
     ollama_host: str = "http://localhost:11434"
     ollama_model: str = "qwen2.5:3b-instruct"
