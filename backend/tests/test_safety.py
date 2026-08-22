@@ -58,7 +58,7 @@ class TestDenied:
             'GRANT ALL ON "house" TO "user"',
             'REVOKE ALL ON "house" FROM "user"',
             "KILL QUERY 1",
-            'SET PASSWORD FOR "user" = \'x\'',
+            "SET PASSWORD FOR \"user\" = 'x'",
         ],
     )
     def test_blocked_statements(self, q):

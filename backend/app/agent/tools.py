@@ -186,9 +186,7 @@ def _handle_get_schema_for(tool_input: dict[str, Any], ctx: ToolContext) -> dict
     return out
 
 
-async def _handle_run_influxql(
-    tool_input: dict[str, Any], ctx: ToolContext
-) -> dict[str, Any]:
+async def _handle_run_influxql(tool_input: dict[str, Any], ctx: ToolContext) -> dict[str, Any]:
     query = tool_input.get("query", "").strip()
     if not query:
         return {"error": "query is empty"}

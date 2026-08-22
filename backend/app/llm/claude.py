@@ -32,9 +32,7 @@ class ClaudeProvider(LLMProvider):
 
     def __init__(self, settings: Settings) -> None:
         if not settings.anthropic_api_key:
-            raise RuntimeError(
-                "ANTHROPIC_API_KEY is not set; cannot use the Claude provider."
-            )
+            raise RuntimeError("ANTHROPIC_API_KEY is not set; cannot use the Claude provider.")
         self._client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
         self.model = settings.llm_model
         self._effort = settings.llm_effort
@@ -82,21 +80,14 @@ class ClaudeProvider(LLMProvider):
             if block.type == "text":
                 content.append(TextBlock(text=block.text))
             elif block.type == "tool_use":
-                content.append(
-                    ToolUseBlock(id=block.id, name=block.name, input=dict(block.input))
-                )
+                content.append(ToolUseBlock(id=block.id, name=block.name, input=dict(block.input)))
 
         usage = {
             "input_tokens": response.usage.input_tokens,
             "output_tokens": response.usage.output_tokens,
-            "cache_creation_input_tokens": getattr(
-                response.usage, "cache_creation_input_tokens", 0
-            )
+            "cache_creation_input_tokens": getattr(response.usage, "cache_creation_input_tokens", 0)
             or 0,
-            "cache_read_input_tokens": getattr(
-                response.usage, "cache_read_input_tokens", 0
-            )
-            or 0,
+            "cache_read_input_tokens": getattr(response.usage, "cache_read_input_tokens", 0) or 0,
         }
         logger.debug("claude usage: %s, stop=%s", usage, response.stop_reason)
 
@@ -113,9 +104,7 @@ def _to_api_message(m: Message) -> dict[str, Any]:
         if isinstance(b, TextBlock):
             blocks.append({"type": "text", "text": b.text})
         elif isinstance(b, ToolUseBlock):
-            blocks.append(
-                {"type": "tool_use", "id": b.id, "name": b.name, "input": b.input}
-            )
+            blocks.append({"type": "tool_use", "id": b.id, "name": b.name, "input": b.input})
         elif isinstance(b, ToolResultBlock):
             blocks.append(
                 {

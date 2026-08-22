@@ -40,8 +40,7 @@ async def get_schema(request: Request) -> SchemaSummary:
     with Session(engine) as session:
         cached = list_cached(session)
         annotations = {
-            a.measurement: a.description
-            for a in session.exec(select(MeasurementAnnotation)).all()
+            a.measurement: a.description for a in session.exec(select(MeasurementAnnotation)).all()
         }
         measurements = [
             MeasurementOut(

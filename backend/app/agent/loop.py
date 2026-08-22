@@ -92,9 +92,7 @@ async def run_agent(
             yield {"event": "error", "data": {"message": f"LLM error: {exc}"}}
             return
 
-        last_assistant = [
-            b for b in turn.content if isinstance(b, (TextBlock, ToolUseBlock))
-        ]
+        last_assistant = [b for b in turn.content if isinstance(b, (TextBlock, ToolUseBlock))]
         last_stop_reason = turn.stop_reason
         text_blocks = [b.text for b in last_assistant if isinstance(b, TextBlock) and b.text]
         tool_calls = [b for b in last_assistant if isinstance(b, ToolUseBlock)]
@@ -117,13 +115,9 @@ async def run_agent(
                 "event": "tool_call",
                 "data": {"id": tc.id, "name": tc.name, "input": tc.input, "step": step},
             }
-            result_text, maybe_final, is_error = await handle_tool_call(
-                tc.name, tc.input, ctx
-            )
+            result_text, maybe_final, is_error = await handle_tool_call(tc.name, tc.input, ctx)
             tool_result_blocks.append(
-                ToolResultBlock(
-                    tool_use_id=tc.id, content=result_text, is_error=is_error
-                )
+                ToolResultBlock(tool_use_id=tc.id, content=result_text, is_error=is_error)
             )
             yield {
                 "event": "tool_result",
@@ -221,9 +215,7 @@ def _serialize_message(m: Message | None) -> dict[str, Any] | None:
         if isinstance(b, TextBlock):
             blocks.append({"type": "text", "text": b.text})
         elif isinstance(b, ToolUseBlock):
-            blocks.append(
-                {"type": "tool_use", "id": b.id, "name": b.name, "input": b.input}
-            )
+            blocks.append({"type": "tool_use", "id": b.id, "name": b.name, "input": b.input})
         elif isinstance(b, ToolResultBlock):
             blocks.append(
                 {
