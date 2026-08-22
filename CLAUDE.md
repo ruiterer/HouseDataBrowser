@@ -68,15 +68,15 @@ backend reads it via Pydantic Settings.
 ## Platform membership (machine platform, D-021/D-023)
 
 Member of the Mac platform at **minimal level**: `platform/manifest.toml`
-(installed copy in `~/.config/platform-hub/manifests/`). `proxy = false`
-(React SPA, not prefix-aware) with `lan = true`: the hub tile links to
-`http://<hostname>:8603/`. The Docker **host port moved 8000 → 8603**
-(8000 belongs to Transcriber_App — register: Portfolio_Manager
-`registry/ports.toml`); the container port stays 8000. The platform nav bar
-(`frontend/public/platform-header.js`, tag in `frontend/index.html`) ships
-with the next `docker compose up --build`. Moving the binding to 127.0.0.1
-behind the hub is deliberately deferred to this project's maintenance
-session — it requires making the SPA prefix-aware first.
+(installed copy in `~/.config/platform-hub/manifests/`). Since the D-025
+modernization session the SPA is **prefix-aware** (`frontend/src/base.ts`:
+runtime base detection; Vite `base: "./"`; router basename) and the manifest
+has `proxy = true` with `lan = true`: the hub serves the app at
+`/t/housedata/` and is the only external route — the Docker host port binds
+`127.0.0.1:8603` (8603 per Portfolio_Manager `registry/ports.toml`; 8000
+belongs to Transcriber_App); the container port stays 8000. The platform
+nav bar lives in `frontend/public/platform-header.js` (tag in
+`frontend/index.html`).
 
 ## Architecture — what's load-bearing across files
 
