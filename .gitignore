@@ -30,3 +30,6 @@ data/
 .idea/
 *.swp
 *.swo
+
+# Claude Code: machine-local settings stay out of git
+.claude/settings.local.json
