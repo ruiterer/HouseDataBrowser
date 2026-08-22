@@ -1,3 +1,4 @@
+import { apiUrl } from "../base";
 export type FieldKey = { name: string; type: string };
 
 export type Measurement = {
@@ -17,13 +18,13 @@ export type SchemaSummary = {
 };
 
 export async function fetchSchema(): Promise<SchemaSummary> {
-  const res = await fetch("/api/schema");
+  const res = await fetch(apiUrl("/api/schema"));
   if (!res.ok) throw new Error(`fetchSchema failed: ${res.status}`);
   return res.json();
 }
 
 export async function updateDescription(measurement: string, description: string): Promise<Measurement> {
-  const res = await fetch(`/api/schema/${encodeURIComponent(measurement)}/description`, {
+  const res = await fetch(apiUrl(`/api/schema/${encodeURIComponent(measurement)}/description`), {
     method: "PUT",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ description }),
@@ -33,7 +34,7 @@ export async function updateDescription(measurement: string, description: string
 }
 
 export async function triggerRefresh(): Promise<{ status: string }> {
-  const res = await fetch("/api/schema/refresh", { method: "POST" });
+  const res = await fetch(apiUrl("/api/schema/refresh"), { method: "POST" });
   if (!res.ok) throw new Error(`triggerRefresh failed: ${res.status}`);
   return res.json();
 }

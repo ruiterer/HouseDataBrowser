@@ -1,4 +1,5 @@
 import { fetchEventSource } from "@microsoft/fetch-event-source";
+import { apiUrl } from "../base";
 
 export type ChatEvent =
   | { event: "conversation"; data: { id: string; title: string } }
@@ -37,19 +38,19 @@ export type ConversationDetail = {
 };
 
 export async function listConversations(): Promise<Conversation[]> {
-  const res = await fetch("/api/conversations");
+  const res = await fetch(apiUrl("/api/conversations"));
   if (!res.ok) throw new Error("listConversations failed");
   return res.json();
 }
 
 export async function getConversation(id: string): Promise<ConversationDetail> {
-  const res = await fetch(`/api/conversations/${id}`);
+  const res = await fetch(apiUrl(`/api/conversations/${id}`));
   if (!res.ok) throw new Error("getConversation failed");
   return res.json();
 }
 
 export async function deleteConversation(id: string): Promise<void> {
-  const res = await fetch(`/api/conversations/${id}`, { method: "DELETE" });
+  const res = await fetch(apiUrl(`/api/conversations/${id}`), { method: "DELETE" });
   if (!res.ok) throw new Error("deleteConversation failed");
 }
 
@@ -66,7 +67,7 @@ export type StreamChatOpts = {
 
 export async function streamChat(opts: StreamChatOpts): Promise<void> {
   const { conversationId, message, deep, provider, model, onEvent, onError, signal } = opts;
-  await fetchEventSource("/api/chat", {
+  await fetchEventSource(apiUrl("/api/chat"), {
     method: "POST",
     headers: { "content-type": "application/json", accept: "text/event-stream" },
     body: JSON.stringify({
@@ -102,7 +103,7 @@ export type ResultDoc = {
 };
 
 export async function fetchResult(ref: string): Promise<ResultDoc> {
-  const res = await fetch(`/api/results/${ref}`);
+  const res = await fetch(apiUrl(`/api/results/${ref}`));
   if (!res.ok) throw new Error("fetchResult failed");
   return res.json();
 }

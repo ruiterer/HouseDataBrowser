@@ -1,3 +1,4 @@
+import { apiUrl } from "../base";
 export type ProviderInfo = {
   name: string;
   default_model: string;
@@ -13,7 +14,7 @@ export type ProvidersResponse = {
 };
 
 export async function listProviders(): Promise<ProvidersResponse> {
-  const res = await fetch("/api/providers");
+  const res = await fetch(apiUrl("/api/providers"));
   if (!res.ok) throw new Error("listProviders failed");
   return res.json();
 }
