@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     state_db_path: str = "./data/state.db"
     results_ttl_seconds: int = 3600
 
-    api_host: str = "0.0.0.0"
+    api_host: str = "0.0.0.0"  # noqa: S104 -- container bind; host exposure is 127.0.0.1 via compose
     api_port: int = 8000
 
 

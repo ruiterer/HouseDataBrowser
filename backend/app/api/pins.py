@@ -61,9 +61,7 @@ def _to_out(p: PinnedChart) -> PinOut:
 async def list_pins(request: Request) -> list[PinOut]:
     engine = request.app.state.db_engine
     with Session(engine) as session:
-        rows = session.exec(
-            select(PinnedChart).order_by(PinnedChart.created_at)
-        ).all()
+        rows = session.exec(select(PinnedChart).order_by(PinnedChart.created_at)).all()
         return [_to_out(p) for p in rows]
 
 
@@ -135,7 +133,7 @@ async def get_pin_data(pin_id: str, request: Request) -> dict[str, Any]:
         result = await influx.query(pin.query)
     except Exception as exc:
         logger.warning("pin %s query failed: %s", pin_id, exc)
-        raise HTTPException(status_code=502, detail=f"query failed: {exc}")
+        raise HTTPException(status_code=502, detail=f"query failed: {exc}") from exc
 
     columns: list[str] = []
     rows: list[dict[str, Any]] = []

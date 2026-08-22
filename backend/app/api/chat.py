@@ -27,6 +27,8 @@ from sse_starlette.sse import EventSourceResponse
 from app.agent.loop import run_agent
 from app.llm.provider import (
     Message as LLMMessage,
+)
+from app.llm.provider import (
     TextBlock,
 )
 from app.state.models import Conversation, ConversationMessage
@@ -71,9 +73,7 @@ class ConversationDetail(BaseModel):
 async def list_conversations(request: Request) -> list[ConversationOut]:
     engine = request.app.state.db_engine
     with Session(engine) as session:
-        rows = session.exec(
-            select(Conversation).order_by(Conversation.updated_at.desc())
-        ).all()
+        rows = session.exec(select(Conversation).order_by(Conversation.updated_at.desc())).all()
         return [ConversationOut(**c.model_dump()) for c in rows]
 
 
@@ -136,7 +136,7 @@ async def chat(body: ChatRequest, request: Request):
     try:
         provider = registry.get(body.provider)
     except RuntimeError as exc:
-        raise HTTPException(status_code=400, detail=str(exc))
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     with Session(engine) as session:
         if body.conversation_id:
@@ -153,10 +153,15 @@ async def chat(body: ChatRequest, request: Request):
     async def event_stream():
         with Session(engine) as session:
             convo_local = session.get(Conversation, convo.id)
-            yield {"event": "conversation", "data": json.dumps({
-                "id": convo_local.id,
-                "title": convo_local.title,
-            })}
+            yield {
+                "event": "conversation",
+                "data": json.dumps(
+                    {
+                        "id": convo_local.id,
+                        "title": convo_local.title,
+                    }
+                ),
+            }
 
             user_msg = ConversationMessage(
                 conversation_id=convo_local.id,
@@ -253,9 +258,7 @@ def _load_history(session: Session, conversation_id: str) -> list[LLMMessage]:
             out.append(LLMMessage(role="assistant", content=[TextBlock(text=text)]))
         else:
             user_text = " ".join(
-                b.get("text", "")
-                for b in (m.content or [])
-                if b.get("type") == "text"
+                b.get("text", "") for b in (m.content or []) if b.get("type") == "text"
             ).strip()
             if user_text:
                 out.append(LLMMessage(role="user", content=[TextBlock(text=user_text)]))
@@ -274,9 +277,7 @@ def _render_assistant_history(m: ConversationMessage) -> str:
     if not parts:
         # Fallback: stitch any plain text blocks if nothing else was saved
         text = " ".join(
-            b.get("text", "")
-            for b in (m.content or [])
-            if b.get("type") == "text"
+            b.get("text", "") for b in (m.content or []) if b.get("type") == "text"
         ).strip()
         return text
     return "\n\n".join(parts)

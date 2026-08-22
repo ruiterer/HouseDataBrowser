@@ -43,3 +43,15 @@ asyncio_mode = "auto"
 [tool.ruff]
 line-length = 100
 target-version = "py312"
+
+# Golden-template lint rules (D-027 in Portfolio_Manager), merged into the
+# existing [tool.ruff] block: pinned baseline (E4/E7/E9/F), import sorting
+# (I), security patterns (S) and classic pitfalls (B).
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "S", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+# S101 forbids `assert` — in test code assert is the tool of the trade.
+"tests/**" = ["S101"]
+"**/test_*.py" = ["S101"]
+"**/*_test.py" = ["S101"]

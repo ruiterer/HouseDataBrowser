@@ -43,7 +43,7 @@ class SchemaRefresher:
             self._task.cancel()
             try:
                 await self._task
-            except (asyncio.CancelledError, Exception):
+            except (asyncio.CancelledError, Exception):  # noqa: S110 -- best-effort task teardown on shutdown
                 pass
 
     async def trigger_now(self) -> None:
