@@ -1,6 +1,6 @@
 """Claude provider via the Anthropic SDK.
 
-Defaults: claude-opus-4-7 with adaptive thinking + effort=high. The system prompt
+Defaults: claude-opus-5 with adaptive thinking + effort=high. The system prompt
 and tool list are marked with `cache_control: ephemeral` so the (large) schema
 overview rides the prompt cache at ~0.1x cost on subsequent turns.
 """

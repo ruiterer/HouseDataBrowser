@@ -22,12 +22,13 @@ class Settings(BaseSettings):
     influx_row_limit: int = 50_000
 
     llm_provider: Literal["claude", "ollama"] = "claude"
-    llm_model: str = "claude-opus-4-7"
-    # Supported by the Messages API on Opus 4.7: low | medium | high | max.
-    # ("xhigh" is documented for some clients but currently rejected by /v1/messages.)
-    llm_effort: Literal["low", "medium", "high", "max"] = "high"
-    # 64K is the recommended default for streaming requests on Opus 4.7 — leaves
-    # room for thinking + tool calls + final response at high/max effort. We use
+    llm_model: str = "claude-opus-5"
+    # Effort levels accepted by /v1/messages on current models (Opus 4.7+):
+    # low | medium | high | xhigh | max. Default high balances quality and
+    # token spend; the UI's "Diep nadenken" toggle bumps a message to max.
+    llm_effort: Literal["low", "medium", "high", "xhigh", "max"] = "high"
+    # 64K is the recommended default for streaming requests — leaves room for
+    # thinking + tool calls + final response at high/max effort. We use
     # streaming + get_final_message() in the Claude provider so this is safe.
     llm_max_tokens: int = 64000
     llm_max_agent_steps: int = 12

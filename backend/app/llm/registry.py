@@ -4,7 +4,7 @@ Holds one instance of every LLM provider the user has configured (Claude if
 ANTHROPIC_API_KEY is set, Ollama if OLLAMA_HOST is reachable). The chat
 endpoint resolves a per-request `provider` field through this registry.
 
-For Claude the model list is hard-coded — only the four current Anthropic IDs.
+For Claude the model list is hard-coded — a curated set of current Anthropic IDs.
 For Ollama we query /api/tags to surface whichever models the user has pulled
 locally; an unreachable Ollama just returns an empty list (the UI will then
 hide that option) without crashing the app.
@@ -24,11 +24,15 @@ from app.llm.provider import LLMProvider
 
 logger = logging.getLogger(__name__)
 
+# First entry doubles as the fallback default when LLM_MODEL is not in the
+# list. claude-fable-5 (Mythos tier, 2x Opus pricing) requires the API org to
+# be on 30-day data retention; it is offered as a manual pick, not a default.
 CLAUDE_MODELS: tuple[str, ...] = (
-    "claude-opus-4-7",
-    "claude-opus-4-6",
-    "claude-sonnet-4-6",
+    "claude-opus-5",
+    "claude-opus-4-8",
+    "claude-sonnet-5",
     "claude-haiku-4-5",
+    "claude-fable-5",
 )
 
 
