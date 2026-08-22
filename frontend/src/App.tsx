@@ -1,4 +1,4 @@
-import { NavLink, Route, Routes } from "react-router-dom";
+import { NavLink, Route, Routes } from "react-router";
 import Chat from "./pages/Chat";
 import Dashboard from "./pages/Dashboard";
 import Schema from "./pages/Schema";
