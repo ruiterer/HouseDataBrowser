@@ -12,7 +12,7 @@ health_path = "/"
 blocks = []
 kit_version = "none"
 level = "minimal"
-# React-SPA, niet prefix-bewust (D-023) én bewust LAN-breed (Docker):
-# direct-link-tegel op basis van de hostnaam waarmee de hub is benaderd
+# Prefix-bewuste SPA sinds de D-025-moderniseringssessie; de Docker-poort
+# bindt op 127.0.0.1 en de hub-proxy is de enige route van buitenaf.
 lan = true
-proxy = false
+proxy = true

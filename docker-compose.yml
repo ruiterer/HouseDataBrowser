@@ -5,7 +5,7 @@ services:
     container_name: housedatabrowser
     restart: unless-stopped
     ports:
-      - "8603:8000"  # hostpoort 8603: 8000 botste met Transcriber_App (Portfolio_Manager registry/ports.toml)
+      - "127.0.0.1:8603:8000"  # localhost-only: the hub proxy is the only external route (D-022 p7, D-025); 8603 per registry/ports.toml
     env_file:
       - .env
     volumes:
