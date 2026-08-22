@@ -23,7 +23,10 @@ export async function fetchSchema(): Promise<SchemaSummary> {
   return res.json();
 }
 
-export async function updateDescription(measurement: string, description: string): Promise<Measurement> {
+export async function updateDescription(
+  measurement: string,
+  description: string,
+): Promise<Measurement> {
   const res = await fetch(apiUrl(`/api/schema/${encodeURIComponent(measurement)}/description`), {
     method: "PUT",
     headers: { "content-type": "application/json" },

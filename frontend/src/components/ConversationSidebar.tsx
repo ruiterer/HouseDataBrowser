@@ -1,9 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  deleteConversation,
-  listConversations,
-  type Conversation,
-} from "../api/chat";
+import { deleteConversation, listConversations, type Conversation } from "../api/chat";
 
 type Props = {
   activeId: string | null;
@@ -28,11 +24,15 @@ export default function ConversationSidebar({ activeId, onSelect }: Props) {
     <aside className="convo-sidebar">
       <div className="convo-header">
         <span>Gesprekken</span>
-        <button onClick={() => onSelect(null)} title="Nieuw gesprek">+ Nieuw</button>
+        <button onClick={() => onSelect(null)} title="Nieuw gesprek">
+          + Nieuw
+        </button>
       </div>
       {isLoading && <div className="muted">laden…</div>}
       {!isLoading && (data?.length ?? 0) === 0 && (
-        <div className="muted convo-empty">Nog geen gesprekken. Stel een vraag om er een te starten.</div>
+        <div className="muted convo-empty">
+          Nog geen gesprekken. Stel een vraag om er een te starten.
+        </div>
       )}
       <ul className="convo-list">
         {(data ?? []).map((c: Conversation) => (

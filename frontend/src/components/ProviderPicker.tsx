@@ -79,17 +79,18 @@ export default function ProviderPicker({ value, onChange, disabled }: Props) {
           onChange={(e) => pickModel(e.target.value)}
           disabled={disabled || activeProvider.models.length === 0}
         >
-          {activeProvider.models.length === 0 && (
-            <option value={value.model}>{value.model}</option>
-          )}
+          {activeProvider.models.length === 0 && <option value={value.model}>{value.model}</option>}
           {activeProvider.models.map((m) => (
-            <option key={m} value={m}>{m}</option>
+            <option key={m} value={m}>
+              {m}
+            </option>
           ))}
         </select>
       </label>
       {!activeProvider.available && (
         <span className="picker-error">
-          {activeProvider.name} niet bereikbaar{activeProvider.error ? `: ${activeProvider.error}` : ""}
+          {activeProvider.name} niet bereikbaar
+          {activeProvider.error ? `: ${activeProvider.error}` : ""}
         </span>
       )}
     </div>

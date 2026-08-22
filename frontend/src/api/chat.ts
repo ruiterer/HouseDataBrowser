@@ -7,9 +7,15 @@ export type ChatEvent =
   | { event: "agent_start"; data: { provider: string; model: string; effort?: string } }
   | { event: "assistant_text"; data: { text: string; step: number } }
   | { event: "tool_call"; data: { id: string; name: string; input: any; step: number } }
-  | { event: "tool_result"; data: { id: string; name: string; is_error: boolean; preview: string; step: number } }
+  | {
+      event: "tool_result";
+      data: { id: string; name: string; is_error: boolean; preview: string; step: number };
+    }
   | { event: "usage"; data: Record<string, number> }
-  | { event: "final"; data: { summary: string; query: string; chart: any | null; data_ref: string | null } }
+  | {
+      event: "final";
+      data: { summary: string; query: string; chart: any | null; data_ref: string | null };
+    }
   | { event: "saved"; data: { assistant_message_id: string } }
   | { event: "done"; data: any }
   | { event: "error"; data: { message: string } };

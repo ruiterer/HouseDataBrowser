@@ -50,7 +50,8 @@ export default function DataTable({ columns, rows, maxRows = 200 }: Props) {
     <div className="table-wrap">
       <div className="table-meta">
         <span className="muted">
-          {visibleRows.length.toLocaleString("nl-NL")} van {rows.length.toLocaleString("nl-NL")} rijen weergegeven
+          {visibleRows.length.toLocaleString("nl-NL")} van {rows.length.toLocaleString("nl-NL")}{" "}
+          rijen weergegeven
         </span>
         <button onClick={downloadCsv}>CSV downloaden</button>
       </div>
@@ -60,11 +61,7 @@ export default function DataTable({ columns, rows, maxRows = 200 }: Props) {
             {table.getHeaderGroups().map((hg) => (
               <tr key={hg.id}>
                 {hg.headers.map((h) => (
-                  <th
-                    key={h.id}
-                    onClick={h.column.getToggleSortingHandler()}
-                    className="sortable"
-                  >
+                  <th key={h.id} onClick={h.column.getToggleSortingHandler()} className="sortable">
                     {flexRender(h.column.columnDef.header, h.getContext())}
                     {h.column.getIsSorted() === "asc" && " ▴"}
                     {h.column.getIsSorted() === "desc" && " ▾"}

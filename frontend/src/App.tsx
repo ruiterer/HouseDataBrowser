@@ -10,7 +10,9 @@ export default function App() {
       <nav className="nav">
         <div className="nav-brand">HouseDataBrowser</div>
         <div className="nav-links">
-          <NavLink to="/" end>Chat</NavLink>
+          <NavLink to="/" end>
+            Chat
+          </NavLink>
           <NavLink to="/dashboard">Dashboard</NavLink>
           <NavLink to="/schema">Schema</NavLink>
         </div>

@@ -52,7 +52,10 @@ export default function ChatInput({
           onChange={(e) => setText(e.target.value)}
           onKeyDown={onKey}
           rows={3}
-          placeholder={placeholder ?? "Stel een vraag over de data van je huis… (bv. 'vergelijk elektriciteitsproductie zomer 2024 met zomer 2023')"}
+          placeholder={
+            placeholder ??
+            "Stel een vraag over de data van je huis… (bv. 'vergelijk elektriciteitsproductie zomer 2024 met zomer 2023')"
+          }
           disabled={disabled}
         />
         <button onClick={send} disabled={disabled || !text.trim()}>
@@ -65,7 +68,7 @@ export default function ChatInput({
           className={`deep-toggle ${deep && !deepDisabled ? "on" : ""}`}
           title={
             deepDisabled
-              ? deepDisabledReason ?? "Niet beschikbaar voor deze provider."
+              ? (deepDisabledReason ?? "Niet beschikbaar voor deze provider.")
               : "Forceert maximale denktijd voor deze ene vraag — gebruik voor complexe vragen die meerdere measurements moeten combineren of waar Claude vaker fout gaat."
           }
         >

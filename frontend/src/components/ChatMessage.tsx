@@ -19,7 +19,9 @@ export type LiveAssistantMessage = {
   errorMessage?: string;
 };
 
-type Props = { msg: ConversationMessage | { role: "user"; content: string } | LiveAssistantMessage };
+type Props = {
+  msg: ConversationMessage | { role: "user"; content: string } | LiveAssistantMessage;
+};
 
 function isUserStub(m: Props["msg"]): m is { role: "user"; content: string } {
   return (m as any).role === "user" && typeof (m as any).content === "string";
@@ -61,23 +63,13 @@ export default function ChatMessage({ msg }: Props) {
     <div className="msg msg-assistant">
       <div className="msg-role">HouseDataBrowser</div>
       <div className="msg-body">
-        {msg.final_summary && (
-          <Markdown className="summary" content={msg.final_summary} />
-        )}
+        {msg.final_summary && <Markdown className="summary" content={msg.final_summary} />}
         {msg.final_data_ref && msg.final_chart && (
-          <ResultBlock
-            dataRef={msg.final_data_ref}
-            chart={msg.final_chart as ChartSpec}
-          />
+          <ResultBlock dataRef={msg.final_data_ref} chart={msg.final_chart as ChartSpec} />
         )}
-        {msg.final_data_ref && !msg.final_chart && (
-          <ResultTable dataRef={msg.final_data_ref} />
-        )}
+        {msg.final_data_ref && !msg.final_chart && <ResultTable dataRef={msg.final_data_ref} />}
         {msg.final_chart && msg.final_query && (
-          <PinButton
-            query={msg.final_query}
-            chartSpec={msg.final_chart as ChartSpec}
-          />
+          <PinButton query={msg.final_query} chartSpec={msg.final_chart as ChartSpec} />
         )}
         {msg.final_query && <QueryDebugPanel query={msg.final_query} />}
       </div>
@@ -91,7 +83,12 @@ function LiveMessage({ msg }: { msg: LiveAssistantMessage }) {
     <div className="msg msg-assistant">
       <div className="msg-role">
         HouseDataBrowser
-        {msg.status === "running" && <span className="dot-pulse" aria-label="bezig"> ●●●</span>}
+        {msg.status === "running" && (
+          <span className="dot-pulse" aria-label="bezig">
+            {" "}
+            ●●●
+          </span>
+        )}
       </div>
       <div className="msg-body">
         {!final && (
@@ -112,9 +109,7 @@ function LiveMessage({ msg }: { msg: LiveAssistantMessage }) {
         {msg.errorMessage && <div className="error-banner">Fout: {msg.errorMessage}</div>}
         {final && (
           <>
-            {final.summary && (
-              <Markdown className="summary" content={final.summary} />
-            )}
+            {final.summary && <Markdown className="summary" content={final.summary} />}
             {final.data_ref && final.chart && (
               <ResultBlock dataRef={final.data_ref} chart={final.chart} />
             )}
@@ -144,7 +139,10 @@ function ResultBlock({ dataRef, chart }: { dataRef: string; chart: ChartSpec }) 
     staleTime: Infinity,
   });
   if (isLoading) return <div className="muted">data laden…</div>;
-  if (isError) return <div className="error-banner">Fout bij laden van resultaat: {(error as Error).message}</div>;
+  if (isError)
+    return (
+      <div className="error-banner">Fout bij laden van resultaat: {(error as Error).message}</div>
+    );
   if (!data) return null;
   return (
     <>

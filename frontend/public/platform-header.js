@@ -10,7 +10,8 @@
     return; // hub niet bereikbaar: niets tonen (autonoom)
   }
   const bar = document.createElement("div");
-  bar.style.cssText = "background:#1f2937;color:#e5e7eb;font:0.85rem " +
+  bar.style.cssText =
+    "background:#1f2937;color:#e5e7eb;font:0.85rem " +
     "-apple-system,sans-serif;padding:0.4rem 1rem;display:flex;gap:1rem;" +
     "align-items:center;flex-wrap:wrap;";
   const home = document.createElement("a");
@@ -23,7 +24,8 @@
     const a = document.createElement("a");
     a.href = t.url.startsWith("http") ? t.url : hub + t.url;
     a.textContent = t.title;
-    a.style.cssText = "color:#e5e7eb;text-decoration:none;" +
+    a.style.cssText =
+      "color:#e5e7eb;text-decoration:none;" +
       (t.name === "housedata" ? "font-weight:700;" : "opacity:0.8;");
     bar.append(a);
   }

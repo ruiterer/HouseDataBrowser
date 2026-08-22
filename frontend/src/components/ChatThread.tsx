@@ -22,7 +22,9 @@ export default function ChatThread({ messages, pendingUser, live }: Props) {
           <li>"Wat was de gemiddelde binnentemperatuur in januari 2024?"</li>
           <li>"Vergelijk de elektriciteitsproductie van zomer 2024 met zomer 2023."</li>
           <li>"Hoe vaak is de voordeur afgelopen week geopend?"</li>
-          <li>"Toon een heatmap van vochtigheid per uur en dag van de week voor afgelopen maand."</li>
+          <li>
+            "Toon een heatmap van vochtigheid per uur en dag van de week voor afgelopen maand."
+          </li>
         </ul>
       </div>
     );

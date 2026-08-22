@@ -1,12 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  fetchSchema,
-  triggerRefresh,
-  updateDescription,
-  type Measurement,
-} from "../api/schema";
+import { fetchSchema, triggerRefresh, updateDescription, type Measurement } from "../api/schema";
 
 function formatTime(iso: string | null | undefined): string {
   if (!iso) return "nooit";
@@ -71,9 +66,9 @@ export default function Schema() {
 
       {data.measurements.length === 0 && (
         <div className="placeholder">
-          Nog geen metingen gevonden. De eerste vernieuwing draait bij het starten;
-          als de InfluxDB-verbinding nog niet werkt, los dat dan eerst op (zie de
-          status-badge rechtsboven).
+          Nog geen metingen gevonden. De eerste vernieuwing draait bij het starten; als de
+          InfluxDB-verbinding nog niet werkt, los dat dan eerst op (zie de status-badge
+          rechtsboven).
         </div>
       )}
 
@@ -179,7 +174,11 @@ function MeasurementCard({ m }: { m: Measurement }) {
                   <li key={tk}>
                     <code>{tk}</code>
                     {sample && sample.length > 0 && (
-                      <span className="muted"> — {sample.slice(0, 8).join(", ")}{sample.length > 8 ? "…" : ""}</span>
+                      <span className="muted">
+                        {" "}
+                        — {sample.slice(0, 8).join(", ")}
+                        {sample.length > 8 ? "…" : ""}
+                      </span>
                     )}
                   </li>
                 );

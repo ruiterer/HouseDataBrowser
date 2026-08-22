@@ -3,13 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import GridLayout, { type Layout } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-import {
-  deletePin,
-  fetchPinData,
-  listPins,
-  updateLayout,
-  type Pin,
-} from "../api/pins";
+import { deletePin, fetchPinData, listPins, updateLayout, type Pin } from "../api/pins";
 import ChartRenderer from "../components/ChartRenderer";
 
 const COLS = 12;
@@ -17,7 +11,12 @@ const ROW_HEIGHT = 70;
 
 export default function Dashboard() {
   const qc = useQueryClient();
-  const { data: pins, isLoading, isError, error } = useQuery({
+  const {
+    data: pins,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
     queryKey: ["pins"],
     queryFn: listPins,
   });
@@ -47,15 +46,14 @@ export default function Dashboard() {
   );
 
   if (isLoading) return <div className="placeholder">Dashboard laden…</div>;
-  if (isError)
-    return <div className="placeholder">Fout: {(error as Error).message}</div>;
+  if (isError) return <div className="placeholder">Fout: {(error as Error).message}</div>;
   if (!pins || pins.length === 0) {
     return (
       <div className="placeholder">
         <h2>Dashboard</h2>
         <p>
-          Nog geen vastgezette grafieken. Klik op <strong>📌 Op dashboard zetten</strong>{" "}
-          onder een grafiek in een chat om er een hier toe te voegen.
+          Nog geen vastgezette grafieken. Klik op <strong>📌 Op dashboard zetten</strong> onder een
+          grafiek in een chat om er een hier toe te voegen.
         </p>
       </div>
     );
@@ -103,7 +101,9 @@ function PinTile({ pin, onDelete }: { pin: Pin; onDelete: () => void }) {
   return (
     <>
       <div className="pin-handle">
-        <span className="pin-title" title={pin.title}>{pin.title}</span>
+        <span className="pin-title" title={pin.title}>
+          {pin.title}
+        </span>
         <span className="pin-actions">
           <button
             onClick={(e) => {
@@ -129,9 +129,7 @@ function PinTile({ pin, onDelete }: { pin: Pin; onDelete: () => void }) {
       <div className="pin-body">
         {isLoading && <div className="muted">data laden…</div>}
         {isError && <div className="error-banner">Fout: {(error as Error).message}</div>}
-        {data && data.rows.length === 0 && (
-          <div className="muted">Geen data voor deze query.</div>
-        )}
+        {data && data.rows.length === 0 && <div className="muted">Geen data voor deze query.</div>}
         {data && data.rows.length > 0 && (
           <ChartRenderer spec={pin.chart_spec} rows={data.rows} height={200} />
         )}

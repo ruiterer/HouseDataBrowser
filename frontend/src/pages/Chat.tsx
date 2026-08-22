@@ -1,11 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  getConversation,
-  streamChat,
-  type ConversationMessage,
-} from "../api/chat";
+import { getConversation, streamChat, type ConversationMessage } from "../api/chat";
 import ChatInput from "../components/ChatInput";
 import ChatThread from "../components/ChatThread";
 import ConversationSidebar from "../components/ConversationSidebar";
@@ -27,9 +23,7 @@ export default function Chat() {
 
   // Handoff from /schema: location.state may carry { prefill, freshConversation }
   useEffect(() => {
-    const state = location.state as
-      | { prefill?: string; freshConversation?: boolean }
-      | null;
+    const state = location.state as { prefill?: string; freshConversation?: boolean } | null;
     if (!state?.prefill) return;
     if (state.freshConversation) {
       abortRef.current?.abort();
@@ -123,9 +117,9 @@ export default function Chat() {
               setLive((m) => {
                 if (!m) return m;
                 const steps = [...m.steps];
-                const last = [...steps].reverse().find(
-                  (s) => s.kind === "tool" && s.toolName === ev.data.name,
-                );
+                const last = [...steps]
+                  .reverse()
+                  .find((s) => s.kind === "tool" && s.toolName === ev.data.name);
                 if (last) {
                   last.text = `${last.text} → ${ev.data.preview}`;
                   if (ev.data.is_error) last.isError = true;
@@ -148,9 +142,7 @@ export default function Chat() {
                   : m,
               );
             } else if (ev.event === "error") {
-              setLive((m) =>
-                m ? { ...m, status: "error", errorMessage: ev.data.message } : m,
-              );
+              setLive((m) => (m ? { ...m, status: "error", errorMessage: ev.data.message } : m));
             } else if (ev.event === "saved") {
               // Refetch all conversation queries (don't filter by activeId — the
               // outer closure may have captured the OLD null id when this is the

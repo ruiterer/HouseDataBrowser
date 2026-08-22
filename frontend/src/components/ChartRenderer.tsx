@@ -70,11 +70,7 @@ function buildTraces(spec: ChartSpec, rows: Record<string, any>[]): Plotly.Data[
     for (const yKey of yKeys) {
       const xs = groupRows.map((r) => r[x]);
       const ys = groupRows.map((r) => coerceNumber(r[yKey]));
-      const name = groupKey
-        ? yKeys.length > 1
-          ? `${groupName} · ${yKey}`
-          : groupName
-        : yKey;
+      const name = groupKey ? (yKeys.length > 1 ? `${groupName} · ${yKey}` : groupName) : yKey;
 
       switch (spec.type) {
         case "line":
