@@ -16,3 +16,8 @@ level = "minimal"
 # bindt op 127.0.0.1 en de hub-proxy is de enige route van buitenaf.
 lan = true
 proxy = true
+
+# Procesbeheer (D-031 in Portfolio_Manager): Docker-container — start en stop
+# zijn losse commando's; de healthcheck van de hub bevestigt het resultaat.
+start_cmd = ["/usr/local/bin/docker", "start", "housedatabrowser"]
+stop_cmd = ["/usr/local/bin/docker", "stop", "housedatabrowser"]
