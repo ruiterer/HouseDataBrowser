@@ -24,6 +24,10 @@
 Geen afwijkingen van de basisregels. Aanvulling: de datalabels in InfluxDB
 zijn overwegend Nederlands; de agent citeert identifiers letterlijk.
 
+Bij wijzigingen aan de InfluxQL-safetylaag (`validate()`) of de
+query-afhandeling: draai vóór de commit /code-review of /security-review
+(D-035) — de app draait op het thuisnetwerk zonder login.
+
 ## Project
 
 HouseDataBrowser is a Dutch-language web app that lets the user (Erik) explore his
@@ -37,6 +41,11 @@ The data labels in InfluxDB are mostly Dutch with some English mixed in (e.g.
 `temperatuur`, `kamer`, `voordeur`). The agent quotes identifiers verbatim.
 
 ## Common commands
+
+Verificatiecommando (v3, from the repo root, identical to the pre-commit
+hook): `(cd backend && .venv/bin/python3 -m pytest tests/ -q && .venv/bin/ruff
+check . && .venv/bin/ruff format --check .) && (cd frontend && npx eslint . &&
+npx prettier --check .)` — the tsc typecheck below runs in CI.
 
 All from `/Users/erik/GenAI/HouseDataBrowser/`:
 
@@ -75,7 +84,7 @@ belongs to Transcriber_App); the container port stays 8000. The platform
 nav bar lives in `frontend/public/platform-header.js` (tag in
 `frontend/index.html`).
 
-## Architecture — what's load-bearing across files
+## Architecture invariants — what's load-bearing across files
 
 ### 1. The InfluxQL safety filter is THE security boundary
 
