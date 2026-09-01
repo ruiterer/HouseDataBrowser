@@ -45,7 +45,8 @@ The data labels in InfluxDB are mostly Dutch with some English mixed in (e.g.
 Verificatiecommando (v3, from the repo root, identical to the pre-commit
 hook): `(cd backend && .venv/bin/python3 -m pytest tests/ -q && .venv/bin/ruff
 check . && .venv/bin/ruff format --check .) && (cd frontend && npx eslint . &&
-npx prettier --check .)` — the tsc typecheck below runs in CI.
+npx prettier --check . && npx tsc -b --noEmit)` — CI runs the same typecheck
+(D-036).
 
 All from `/Users/erik/GenAI/HouseDataBrowser/`:
 

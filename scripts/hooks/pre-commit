@@ -17,7 +17,7 @@ TEST_CMD="(cd backend && .venv/bin/python3 -m pytest tests/ -q)"
 # falen = commit geblokkeerd. Voorbeelden:
 #   .venv/bin/ruff check . && .venv/bin/ruff format --check .
 #   npx eslint . && npx prettier --check .
-LINT_CMD="(cd backend && .venv/bin/ruff check . && .venv/bin/ruff format --check .) && (cd frontend && npx eslint . && npx prettier --check .)"
+LINT_CMD="(cd backend && .venv/bin/ruff check . && .venv/bin/ruff format --check .) && (cd frontend && npx eslint . && npx prettier --check . && npx tsc -b --noEmit)"
 
 if [ -z "$TEST_CMD" ]; then
     echo "pre-commit: TEST_CMD is nog niet ingevuld in scripts/hooks/pre-commit"
