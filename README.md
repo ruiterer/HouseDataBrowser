@@ -1,5 +1,7 @@
 # HouseDataBrowser
 
+> **Status:** persoonlijk hobbyproject — gebouwd voor mijn eigen situatie. Werkt voor mij; geen ondersteuning of onderhoud beloofd.
+
 Een webapp om de data uit je InfluxDB van je huis te verkennen **in natuurlijke taal**
 (Nederlands), zonder zelf InfluxQL te hoeven typen. Stel vragen als
 *"Vergelijk de elektriciteitsproductie van zomer 2024 met zomer 2023"* en je krijgt
@@ -300,3 +302,7 @@ docker-compose.yml
   samenvatting + InfluxQL-query bij follow-ups, zodat we tool_use-blokken
   niet hoeven mee te sturen (Anthropic eist anders directe tool_result-blokken
   erna).
+
+## Licentie
+
+MIT — zie [LICENSE](LICENSE).
